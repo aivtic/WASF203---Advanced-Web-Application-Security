@@ -12,22 +12,30 @@ Welcome to the repository for **ADS201: Advanced Application Security**. This re
 Mr. Aminu Idris brings extensive expertise in cybersecurity, digital forensics, and advanced application security. With a strong background in industry-leading certifications, he is dedicated to equipping students with the knowledge and skills to excel in cybersecurity.
 
 ---
-## Repository Structure
+## Labs Repository Structure
 
-```
-ADS201-Advanced-Application-Security/
-├── labs/                  # Hands-on lab exercises
-├── course-materials/      # Lecture slides, reading materials, and references
-├── assignments/           # Assignment details and submission links
-├── docs/                  # Documentation and FAQs
-├── scripts/               # Scripts for demos or automation
-├── config/                # Configuration files for tools/environments
-├── .github/               # GitHub-specific workflows and templates
-├── .gitignore             # Files to be ignored by Git
-├── CONTRIBUTING.md        # Contribution guidelines
-├── LICENSE                # License for this repository
-└── README.md              # Repository overview and instructions
-```
+| **Lab Number** | **Activity Name**                                                                                          | **Status**      |
+|----------------|------------------------------------------------------------------------------------------------------------|-----------------|
+| Lab 1.0       | [Lab - HTML Injection Exploitation and Mitigation](Labs/lab1.md)                                           | Mandatory       |
+| Lab 2.0       | [Lab - SQL Injection Exploitation and Mitigation](Labs/lab2.md)                                             | Mandatory       |
+| Lab 3.0       | [Lab - Command Injection Exploitation and Mitigation](Labs/lab3.md)                                         | Mandatory       |
+| Lab 4.0       | [Lab - Cross-Site Scripting (XSS) Exploitation and Mitigation](Labs/lab4.md)                                | Mandatory       |
+| Lab 5.0       | [Lab - File Inclusion Vulnerabilities Exploitation](Labs/lab5.md)                                           | Mandatory       |
+| Lab 6.0       | [Lab - Insecure Deserialization and Exploitation](Labs/lab6.md)                                             | Mandatory       |
+| Lab 7.0       | [Lab - Cross-Site Request Forgery (CSRF) Exploitation and Mitigation](Labs/lab7.md)                         | Mandatory       |
+| Lab 8.0       | [Lab - Broken Authentication Exploitation and Mitigation](Labs/lab8.md)                                    | Mandatory       |
+| Lab 9.0       | [Lab - Sensitive Data Exposure Vulnerabilities](Labs/lab9.md)                                              | Mandatory       |
+| Lab 10.0      | [Lab - Using Web Application Firewalls to Block Attacks](Labs/lab10.md)                                    | Mandatory       |
+| Lab 11.0      | [Lab - Privilege Escalation via Web Applications](Labs/lab11.md)                                           | Mandatory       |
+| Lab 12.0      | [Lab - Web Application Security Best Practices](Labs/lab12.md)                                             | Mandatory       |
+| Lab 13.0      | [Lab - Session Hijacking Exploitation and Mitigation](Labs/lab13.md)                                       | Mandatory       |
+| Lab 14.0      | [Lab - IDOR (Insecure Direct Object Reference) Exploitation](Labs/lab14.md)                                | Mandatory       |
+| Lab 15.0      | [Capstone Project - Live Vulnerable Web Application Hosting](Labs/lab15.md)                                | Mandatory       |
+| Lab 16.0      | [Capstone Project - Presentation and Security Review](Labs/lab16.md)                                       | Mandatory       |
+
+---
+
+
 
 ---
 
