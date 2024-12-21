@@ -1,0 +1,39 @@
+# Ignore system files
+.DS_Store
+Thumbs.db
+
+# Logs and temporary files
+*.log
+*.tmp
+*.swp
+
+# Node.js dependencies
+node_modules/
+npm-debug.log
+
+# Python virtual environments
+__pycache__/
+*.py[cod]
+.env
+
+# PHP and Composer
+vendor/
+composer.lock
+
+# IDE settings
+.vscode/
+.idea/
+
+# Build and cache directories
+build/
+dist/
+.cache/
+
+# OS generated files
+*.~
+*.bak
+*.swo
+
+# Custom files
+config/*.env
+labs/output/
