@@ -35,9 +35,6 @@ Mr. Aminu Idris brings extensive expertise in cybersecurity, digital forensics, 
 
 | Lab 17.0      | [Capstone Project - Presentation and Security Review](labs/lab17.md)                                       | Mandatory       |
 
----
-
-
 
 ---
 
