@@ -1,100 +1,328 @@
-# Lab 1: Advanced SQL Injection Exploitation
-
-## Objective
-This lab focuses on identifying, exploiting, and mitigating SQL injection vulnerabilities in web applications. Students will also learn advanced techniques such as blind SQL injection and time-based exploitation.
+Here's a **complete, step-by-step guide for the Advanced SQL Injection Lab**, including everything from setup to execution and mitigation. This will be a fully structured lab, and you'll be able to hand it off directly to students. I’ve included all necessary files, step-by-step instructions, and explanations.
 
 ---
 
-## Prerequisites
-- Understanding of basic SQL commands (SELECT, INSERT, UPDATE, DELETE).
-- Familiarity with web application architecture.
-- Tools installed:
-  - **Burp Suite** (Community or Professional Edition).
-  - **OWASP Juice Shop** or **DVWA** (Damn Vulnerable Web Application).
-  - Web browser with developer tools (e.g., Chrome, Firefox).
+## **Advanced SQL Injection Lab**
+
+### **Objective:**
+This lab will cover advanced SQL injection techniques including:
+- **Error-based SQL injection**
+- **Time-based Blind SQL injection**
+- **Second-order SQL injection**
+Students will exploit vulnerabilities in a web application, then apply mitigation strategies using secure coding practices.
 
 ---
 
-## Tools Required
-1. Burp Suite
-2. SQLMap
-3. Local environment with a vulnerable application (Juice Shop or DVWA)
+### **Lab Requirements:**
+- **Web Server**: A local server setup such as XAMPP, WAMP, or LAMP (with PHP & MySQL).
+- **Database**: A MySQL database with user authentication and product management.
+- **Basic Knowledge**: Students should have a basic understanding of SQL, PHP, and SQL injection techniques.
 
 ---
 
-## Setup Instructions
-1. **Download and Install DVWA**:
-   - Clone the DVWA repository:
-     ```bash
-     git clone https://github.com/digininja/DVWA.git
-     ```
-   - Set up the environment (e.g., PHP server and database).
-   - Access DVWA at `http://localhost/DVWA`.
-   - Login with the default credentials (admin/password).
-   - Set security level to "Low" in DVWA settings.
+### **Step 1: Setting up the Environment**
 
-2. **Configure Burp Suite**:
-   - Set up a proxy and configure your browser to route traffic through Burp Suite.
+1. **Install a Local Server**
+   - Install **XAMPP** (https://www.apachefriends.org/index.html) or **WAMP** (http://www.wampserver.com/en/) or **LAMP** on your local machine.
+   - Ensure Apache, MySQL, and PHP are running.
 
----
+2. **Create a Database**
+   Open **phpMyAdmin** (http://localhost/phpmyadmin) and execute the following SQL queries to create the database and tables:
 
-## Tasks
-
-### Task 1: Identifying SQL Injection
-1. Navigate to the **Login** page of DVWA.
-2. Enter the following credentials:
-   - Username: `admin' --`
-   - Password: `anything`
-3. Observe if you are logged in without providing the correct password.
-
-**Question**: Why does the above input work?
-
----
-
-### Task 2: Exploiting SQL Injection
-1. Go to the **Search Products** page.
-2. In the search field, input the following payload:
    ```sql
-   ' OR 1=1 --
-   ```
-3. Observe if all records from the database are displayed.
-4. Capture the request in **Burp Suite** and modify it to use a UNION-based payload:
-   ```sql
-   ' UNION SELECT null, database(), user() --
+   CREATE DATABASE vulnerable_db;
+
+   USE vulnerable_db;
+
+   -- Create Users Table
+   CREATE TABLE users (
+       id INT(11) AUTO_INCREMENT PRIMARY KEY,
+       username VARCHAR(50) NOT NULL,
+       password VARCHAR(255) NOT NULL
+   );
+
+   -- Insert Sample Users
+   INSERT INTO users (username, password) VALUES 
+   ('admin', 'admin123'), 
+   ('user', 'user123');
+
+   -- Create Products Table
+   CREATE TABLE products (
+       id INT(11) AUTO_INCREMENT PRIMARY KEY,
+       name VARCHAR(100) NOT NULL,
+       description TEXT
+   );
+
+   -- Insert Sample Products
+   INSERT INTO products (name, description) VALUES
+   ('Product 1', 'Description of Product 1'),
+   ('Product 2', 'Description of Product 2'),
+   ('Product 3', 'Description of Product 3');
    ```
 
-**Expected Result**: The database name and user should appear in the output.
+---
+
+### **Step 2: Vulnerable Application Code**
+
+1. **Create the Folder for the Application**
+   Create a folder named `vulnerable_app` in the `htdocs` (for XAMPP) or `www` (for WAMP) directory.
+
+2. **Application Files:**
+   - `config.php`: Database connection.
+   - `db.php`: Contains database queries.
+   - `index.php`: Home page with links.
+   - `register.php`: User registration form.
+   - `login.php`: User login form.
+   - `search.php`: Search products page.
 
 ---
 
-### Task 3: Blind SQL Injection
-1. Switch the DVWA security level to "Medium."
-2. Use a **time-based SQL injection payload** on the login page:
-   ```sql
-   ' OR IF(1=1, SLEEP(5), 0) --
-   ```
-3. Observe the delay in response time to confirm the vulnerability.
+#### **config.php** (Database Connection)
+
+```php
+<?php
+$servername = "localhost"; // MySQL server address
+$username = "root"; // MySQL username (default for XAMPP is "root")
+$password = ""; // MySQL password (default for XAMPP is "")
+$dbname = "vulnerable_db"; // Database name
+
+// Create connection
+$conn = new mysqli($servername, $username, $password, $dbname);
+
+// Check connection
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+?>
+```
+
+#### **db.php** (Database Queries)
+
+```php
+<?php
+include 'config.php';
+
+// Function to retrieve users based on the username (vulnerable to SQL injection)
+function get_user($username) {
+    global $conn;
+    $sql = "SELECT * FROM users WHERE username = '$username'";  // Vulnerable to SQL injection
+    $result = $conn->query($sql);
+    return $result;
+}
+
+// Function to search for products (vulnerable to SQL injection)
+function get_products($search) {
+    global $conn;
+    $sql = "SELECT * FROM products WHERE name LIKE '%$search%'"; // Vulnerable to SQL injection
+    $result = $conn->query($sql);
+    return $result;
+}
+?>
+```
+
+#### **index.php** (Home Page)
+
+```php
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vulnerable Web Application</title>
+</head>
+<body>
+    <h1>Welcome to the Vulnerable Web Application</h1>
+    <p><a href="register.php">Register</a> | <a href="login.php">Login</a> | <a href="search.php">Search Products</a></p>
+</body>
+</html>
+```
+
+#### **register.php** (User Registration - Vulnerable to Second-order SQL Injection)
+
+```php
+<?php
+include 'db.php';
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $username = $_POST['username'];
+    $password = $_POST['password'];
+
+    // Vulnerable to Second-order SQL Injection
+    $sql = "INSERT INTO users (username, password) VALUES ('$username', '$password')";
+    
+    if ($conn->query($sql) === TRUE) {
+        echo "Registration successful!";
+    } else {
+        echo "Error: " . $conn->error;
+    }
+}
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+</head>
+<body>
+    <h1>Register</h1>
+    <form action="register.php" method="POST">
+        <label for="username">Username:</label>
+        <input type="text" name="username" id="username" required><br><br>
+        <label for="password">Password:</label>
+        <input type="password" name="password" id="password" required><br><br>
+        <button type="submit">Register</button>
+    </form>
+</body>
+</html>
+```
+
+#### **login.php** (Login - Vulnerable to Time-based Blind SQL Injection)
+
+```php
+<?php
+include 'db.php';
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $username = $_POST['username'];
+    $password = $_POST['password'];
+
+    // Vulnerable to Time-based Blind SQL Injection
+    $result = get_user($username);
+
+    if ($result && $result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+        // Assuming passwords are stored in plaintext (for testing purposes)
+        if ($row['password'] == $password) {
+            echo "Login successful!";
+        } else {
+            echo "Invalid credentials.";
+        }
+    } else {
+        echo "No user found with that username.";
+    }
+}
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+</head>
+<body>
+    <h1>Login</h1>
+    <form action="login.php" method="POST">
+        <label for="username">Username:</label>
+        <input type="text" name="username" id="username" required><br><br>
+        <label for="password">Password:</label>
+        <input type="password" name="password" id="password" required><br><br>
+        <button type="submit">Login</button>
+    </form>
+</body>
+</html>
+```
+
+#### **search.php** (Search - Vulnerable to Error-based SQL Injection)
+
+```php
+<?php
+include 'db.php';
+
+if ($_SERVER['REQUEST_METHOD'] == 'GET' && isset($_GET['search'])) {
+    $search = $_GET['search'];
+
+    // Vulnerable to Error-based SQL Injection
+    $result = get_products($search);
+    
+    if ($result && $result->num_rows > 0) {
+        echo "<h3>Search Results:</h3>";
+        while ($row = $result->fetch_assoc()) {
+            echo "Product: " . $row['name'] . "<br>";
+            echo "Description: " . $row['description'] . "<br><br>";
+        }
+    } else {
+        echo "No products found.";
+    }
+}
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Products</title>
+</head>
+<body>
+    <h1>Search for Products</h1>
+    <form action="search.php" method="GET">
+        <label for="search">Search:</label>
+        <input type="text" name="search" id="search" required><br><br>
+        <button type="submit">Search</button>
+    </form>
+</body>
+</html>
+```
 
 ---
 
-### Task 4: Mitigation
-1. Implement input sanitization using prepared statements in PHP.
-2. Test your code by re-running the above SQL injection payloads.
-3. Document your findings and how the vulnerabilities were mitigated.
+### **Step 3: Exploit SQL Injection Vulnerabilities**
+
+#### **1. Error-based SQL Injection**
+- Go to **search.php** and enter this payload into the search box: `' UNION SELECT NULL, NULL, NULL --`.
+- This should trigger a SQL error or data leakage if the application is improperly handling SQL errors.
+
+#### **2. Time-based Blind SQL Injection**
+- Go to **login.php** and try entering this payload into the username field: `' OR SLEEP(
+
+5) --`.
+- The page will delay for 5 seconds if the injection is successful.
+
+#### **3. Second-order SQL Injection**
+- Go to **register.php** and try this payload: `admin' --` in the username field.
+- Log in with `admin' --` as the username and observe that the application fails to properly filter input data.
 
 ---
 
-## Submission
-- Provide a detailed report including:
-  1. Screenshots of each step.
-  2. Explanation of why each payload works.
-  3. Mitigation strategies implemented and tested.
-- Submit your report as a PDF file to the course portal.
+### **Step 4: Mitigation**
+
+#### **1. Use Prepared Statements (to prevent SQL Injection)**
+For **login.php**, modify the database query to use prepared statements instead of direct SQL.
+
+```php
+// Use prepared statements for SQL queries
+$stmt = $conn->prepare("SELECT * FROM users WHERE username = ?");
+$stmt->bind_param("s", $username);
+$stmt->execute();
+$result = $stmt->get_result();
+```
+
+#### **2. Validate Inputs (to prevent SQL Injection)**
+For **register.php**, validate and sanitize input data:
+
+```php
+$username = mysqli_real_escape_string($conn, $_POST['username']);
+$password = mysqli_real_escape_string($conn, $_POST['password']);
+```
+
+#### **3. Error Handling (to prevent information leakage)**
+For **config.php**, disable error reporting:
+
+```php
+ini_set('display_errors', 0);
+```
 
 ---
 
-## Notes
-- Be ethical. Only perform SQL injection on applications you own or are authorized to test.
-- If you face challenges, refer to the [OWASP Testing Guide](https://owasp.org/www-project-web-security-testing-guide/).
+### **Conclusion**
 
-*Happy Hacking!*
+This lab exposed students to various **advanced SQL injection techniques** including **error-based**, **time-based blind**, and **second-order SQL injection**. They then learned how to **mitigate** these vulnerabilities using **prepared statements**, **input validation**, and **error handling**.
+
+This comprehensive approach will enhance students' understanding of real-world vulnerabilities and how to fix them effectively.
+
+---
+
+This lab should provide students with both a practical understanding of SQL injection and its mitigation, as well as an introduction to secure coding practices.
