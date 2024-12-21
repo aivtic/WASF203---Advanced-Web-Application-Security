@@ -4,6 +4,14 @@ Welcome to the repository for **ADS201: Advanced Application Security**. This re
 
 ---
 
+## About the Instructor
+**Mr. Aminu Idris**
+- **Qualifications**: Bsc.Ed, CCNA, CompTIA Security+, CEH, OSCP, CISSP, MPCSEAN
+- **Role**: CEO, International Cybersecurity and Digital Forensics Academy
+
+Mr. Aminu Idris brings extensive expertise in cybersecurity, digital forensics, and advanced application security. With a strong background in industry-leading certifications, he is dedicated to equipping students with the knowledge and skills to excel in cybersecurity.
+
+---
 ## Repository Structure
 
 ```
@@ -38,7 +46,7 @@ ADS201-Advanced-Application-Security/
 
 1. **Clone the Repository**:
    ```bash
-   git clone https://github.com/<your-username>/ADS201-Advanced-Application-Security.git
+   git clone https://github.com/aivtic/ADS201-Advanced-Application-Security.git
    cd ADS201-Advanced-Application-Security
    ```
 
@@ -56,7 +64,7 @@ ADS201-Advanced-Application-Security/
 
 ## Communication
 For queries or discussions, feel free to reach out via:
-- **Email**: support@academy-domain.com
+- **Email**: support@icdfa.org.ng
 - **Slack**: [Course Slack Channel](#)
 - **Office Hours**: TBD
 
