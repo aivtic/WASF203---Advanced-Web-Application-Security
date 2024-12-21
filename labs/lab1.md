@@ -1,6 +1,4 @@
-Here's a **complete, step-by-step guide for the Advanced SQL Injection Lab**, including everything from setup to execution and mitigation. This will be a fully structured lab, and you'll be able to hand it off directly to students. I’ve included all necessary files, step-by-step instructions, and explanations.
 
----
 
 ## **Advanced SQL Injection Lab**
 
