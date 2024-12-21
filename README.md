@@ -16,6 +16,7 @@ Mr. Aminu Idris brings extensive expertise in cybersecurity, digital forensics, 
 
 | **Lab Number** | **Activity Name**                                                                                          | **Status**      |
 |----------------|------------------------------------------------------------------------------------------------------------|-----------------|
+| **Lab 0**      | [XAMPP Installation on Kali Linux](labs/lab0.md)                                                             | Mandatory       |
 | Lab 1.0       | [Lab - SQL Injection Exploitation and Mitigation](labs/lab1.md)                                           | Mandatory       |
 | Lab 2.0       | [Lab - HTML Injection Exploitation and Mitigation ](labs/lab2.md)                                             | Mandatory       |
 | Lab 3.0       | [Lab - Command Injection Exploitation and Mitigation](labs/lab3.md)                                         | Mandatory       |
