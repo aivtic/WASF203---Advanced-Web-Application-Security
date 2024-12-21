@@ -1,6 +1,4 @@
-Certainly! Here's a more **student-centered** version of **Lab 2: HTML Injection**. This version emphasizes instructions directly addressing the students and guides them through the assignment with clear steps and questions for reflection.
 
----
 
 ### **Assignment 2: HTML Injection**
 
