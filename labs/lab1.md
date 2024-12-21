@@ -322,5 +322,3 @@ This lab exposed students to various **advanced SQL injection techniques** inclu
 This comprehensive approach will enhance students' understanding of real-world vulnerabilities and how to fix them effectively.
 
 ---
-
-This lab should provide students with both a practical understanding of SQL injection and its mitigation, as well as an introduction to secure coding practices.
