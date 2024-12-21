@@ -1,6 +1,4 @@
-Let's dive into **Session Hijacking**.
 
----
 
 ### **Lab 14: Session Hijacking and Mitigation**
 
