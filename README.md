@@ -16,8 +16,8 @@ Mr. Aminu Idris brings extensive expertise in cybersecurity, digital forensics, 
 
 | **Lab Number** | **Activity Name**                                                                                          | **Status**      |
 |----------------|------------------------------------------------------------------------------------------------------------|-----------------|
-| Lab 1.0       | [Lab - HTML Injection Exploitation and Mitigation](labs/lab1.md)                                           | Mandatory       |
-| Lab 2.0       | [Lab - SQL Injection Exploitation and Mitigation](labs/lab2.md)                                             | Mandatory       |
+| Lab 1.0       | [Lab - SQL Injection Exploitation and Mitigation](labs/lab1.md)                                           | Mandatory       |
+| Lab 2.0       | [Lab - HTML Injection Exploitation and Mitigation ](labs/lab2.md)                                             | Mandatory       |
 | Lab 3.0       | [Lab - Command Injection Exploitation and Mitigation](labs/lab3.md)                                         | Mandatory       |
 | Lab 4.0       | [Lab - Cross-Site Scripting (XSS) Exploitation and Mitigation](labs/lab4.md)                                | Mandatory       |
 | Lab 5.0       | [Lab - File Inclusion Vulnerabilities Exploitation](labs/lab5.md)                                           | Mandatory       |
