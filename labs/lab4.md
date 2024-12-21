@@ -1,136 +1,93 @@
 
-### **Lab 4: Broken Authentication**
+### **Lab 9: Cross-Site Scripting (XSS)**
 
 #### **Objective:**
 In this lab, you will:
-1. Learn about broken authentication vulnerabilities.
-2. Explore how attackers can exploit weak authentication systems.
-3. Understand how to mitigate broken authentication vulnerabilities using secure password handling and session management.
+1. Learn about **Cross-Site Scripting (XSS)** vulnerabilities.
+2. Understand how attackers exploit XSS to execute scripts in users' browsers.
+3. Mitigate XSS vulnerabilities through proper input validation and output encoding.
 
 ---
 
-### **Task 1: Exploit Broken Authentication**
+### **Task 1: Exploit Cross-Site Scripting (XSS)**
 
 #### **Step 1: Set Up the Vulnerable Web Application**
 
-1. **Create a new folder** for your Broken Authentication lab, e.g., `Lab5_BrokenAuthentication`.
-2. Inside the folder, create two files:
-   - `login.html` (for the login form)
-   - `authenticate.php` (for checking credentials and handling sessions)
+1. **Create a new folder** for the XSS lab, e.g., `Lab10_XSS`.
+2. Inside the folder, create the following files:
+   - `index.php` (a page to simulate an input form and display user-submitted content)
+   - `xss_form.php` (a page where the user submits input)
+   - `xss_output.php` (a page that shows the content submitted by the user)
 
 #### **Step 2: Implement the Vulnerable Code**
 
-- **login.html**: This file contains a simple login form where users can enter their username and password.
+- **index.php**: This page contains a simple input form where users can submit their names.
 
-  ```html
-  <!DOCTYPE html>
-  <html lang="en">
-      <head>
-          <meta charset="UTF-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Broken Authentication Example</title>
-      </head>
-      <body>
-          <h1>Login Form</h1>
-          <form action="authenticate.php" method="post">
-              <label for="username">Username:</label>
-              <input type="text" id="username" name="username" required><br>
-              <label for="password">Password:</label>
-              <input type="password" id="password" name="password" required><br>
-              <button type="submit">Login</button>
-          </form>
-      </body>
-  </html>
+  ```php
+  <form action="xss_form.php" method="post">
+      <label for="name">Enter your name:</label>
+      <input type="text" id="name" name="name" required><br>
+      <button type="submit">Submit</button>
+  </form>
   ```
 
-- **authenticate.php**: This PHP file contains logic for checking the credentials, but it uses **insecure password handling** (storing passwords in plain text) and **doesn’t properly secure sessions**.
+- **xss_form.php**: This page takes user input and submits it without validating or sanitizing it, creating a potential XSS vulnerability.
 
   ```php
   <?php
-  // Simulate a database with hardcoded username and password
-  $username = "user";
-  $password = "password123"; // Stored as plain text (vulnerable)
+  if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+      $name = $_POST['name'];  // Directly using user input without sanitizing
 
-  // Capture user input
-  $user_input_username = $_POST['username'];
-  $user_input_password = $_POST['password'];
-
-  // Insecure login check: plaintext password comparison
-  if ($user_input_username == $username && $user_input_password == $password) {
-      // Insecure session handling: no session tokens, just a simple message
-      echo "<h2>Welcome, $username!</h2>";
-      echo "<p>You are logged in. However, this is insecure!</p>";
-  } else {
-      echo "<h2>Invalid credentials. Try again.</h2>";
+      // Vulnerability: XSS
+      echo "<p>Hello, $name!</p>";  // User input is directly displayed on the page without escaping
   }
   ?>
   ```
 
 #### **Step 3: Exploit the Vulnerability**
 
-1. **Open** the `login.html` file in your browser and attempt to log in using the correct credentials (`username: user`, `password: password123`).
-2. **Observe** that upon successful login, the page simply displays a welcome message. This indicates a potential issue: **the password is stored in plain text**, and there's no session management.
+1. **Submit a malicious payload**: In the form on the `index.php` page, enter the following payload:
 
-3. Try the following attack vectors:
-   - **Password Cracking**: Since the password is stored as plain text, a hacker could easily crack it if they gain access to the database.
-   - **Session Hijacking**: Without proper session management (e.g., session tokens, cookies), an attacker could manipulate requests and access resources without proper authentication.
+   ```html
+   <script>alert('XSS Attack!');</script>
+   ```
+
+2. **Observe the result**: When the form is submitted, the script will execute in the browser and display an alert, demonstrating a **Cross-Site Scripting (XSS)** vulnerability.
 
 **Reflection Questions**:
-- Why is storing passwords in plain text a security risk?
-- How could an attacker exploit the lack of session management?
+- What happens when a malicious script is injected into the input field?
+- How can this attack be used to steal session cookies or redirect users to malicious websites?
 
 ---
 
-### **Task 2: Mitigate Broken Authentication**
+### **Task 2: Mitigate Cross-Site Scripting (XSS)**
 
-#### **Step 1: Secure the Password Storage**
+#### **Step 1: Implement Input Validation and Output Encoding**
 
-To mitigate the broken authentication vulnerability, we need to **hash** the password before storing it. We’ll use PHP’s `password_hash()` function to securely hash the password and `password_verify()` to check it.
+To mitigate the XSS vulnerability, we will sanitize user input and ensure that user-submitted content is displayed safely.
 
-1. **Modify** the `authenticate.php` file to hash the password and verify it securely.
+1. **Modify the `xss_form.php`** page to escape user input before displaying it:
 
-  ```php
-  <?php
-  // Securely store password using password_hash()
-  $username = "user";
-  $hashed_password = '$2y$10$8N5f6eQmJ0nExI0ktHJ9euX0V/qwjo7ejj64ZPaAlcxL2w5Xhbn3K'; // password123 hashed using bcrypt
+   ```php
+   <?php
+   if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+       $name = htmlspecialchars($_POST['name'], ENT_QUOTES, 'UTF-8');  // Sanitize user input
 
-  // Capture user input
-  $user_input_username = $_POST['username'];
-  $user_input_password = $_POST['password'];
+       echo "<p>Hello, $name!</p>";  // Output the sanitized input
+   }
+   ?>
+   ```
 
-  // Use password_verify to securely compare the user input with the hashed password
-  if ($user_input_username == $username && password_verify($user_input_password, $hashed_password)) {
-      // Secure session handling: initiate a session with proper session management
-      session_start();
-      $_SESSION['username'] = $user_input_username;
-      echo "<h2>Welcome, $username!</h2>";
-      echo "<p>You are logged in securely.</p>";
-  } else {
-      echo "<h2>Invalid credentials. Try again.</h2>";
-  }
-  ?>
-  ```
+   The `htmlspecialchars()` function encodes special characters such as `<`, `>`, and `&` to their HTML entity equivalents, preventing any HTML or JavaScript from being executed.
 
-#### **Step 2: Secure Session Management**
+#### **Step 2: Test the Mitigated Version**
 
-1. **Start a session** using `session_start()`, and store the username in a session variable.
-2. Implement **session regeneration** on successful login to prevent session fixation attacks (e.g., by using `session_regenerate_id()`).
-
-```php
-session_start();
-session_regenerate_id(true); // Regenerate session ID to prevent session fixation
-$_SESSION['username'] = $user_input_username;
-```
-
-#### **Step 3: Test the Mitigated Version**
-
-1. **Test the login functionality** again using the correct credentials. The page should now properly authenticate the user using hashed passwords and store session information securely.
-2. Try logging in with incorrect credentials. You should see an error message indicating the failure.
+1. **Submit the malicious payload again**: Enter the same XSS payload (`<script>alert('XSS Attack!');</script>`) in the form and submit it.
+2. **Observe the result**: This time, the input will be sanitized, and the script will not execute. Instead, the text will be displayed as plain text (`&lt;script&gt;alert('XSS Attack!');&lt;/script&gt;`), demonstrating proper output encoding and protection against XSS.
 
 **Reflection Questions**:
-- How does `password_hash()` help secure passwords?
-- Why is session management important, and how does `session_regenerate_id()` help prevent attacks like session fixation?
+- How did sanitizing the user input prevent the XSS attack?
+- What is the importance of using output encoding in preventing XSS vulnerabilities?
 
 ---
 
@@ -138,25 +95,25 @@ $_SESSION['username'] = $user_input_username;
 
 For this assignment, submit the following files:
 
-1. **`login.html`** – The login form.
-2. **`authenticate.php`** – The PHP script, both the insecure and secure versions.
+1. **`index.php`** – The input form page.
+2. **`xss_form.php`** – The page where user input is displayed (before and after mitigation).
 3. **`README.md`** – A brief explanation document that includes:
-   - A description of the broken authentication vulnerability.
+   - A description of Cross-Site Scripting (XSS) vulnerabilities.
    - How you exploited the vulnerability in Task 1.
-   - How you fixed the vulnerability in Task 2 using hashed passwords and secure session management.
-   - Your thoughts on the importance of secure authentication in web applications.
+   - How you mitigated the vulnerability in Task 2 by sanitizing and encoding user input.
+   - Your thoughts on the importance of input validation and output encoding in preventing XSS.
 
 ---
 
 ### **Summary**
 
 In this lab, you:
-- Learned about **broken authentication** vulnerabilities and their risks.
-- Exploited an insecure authentication system with plain-text password storage and improper session management.
-- Mitigated these vulnerabilities by implementing **hashed password storage** and **secure session management**.
+- Learned about **Cross-Site Scripting (XSS)** vulnerabilities and their risks.
+- Exploited an XSS vulnerability by injecting a malicious script through a form input.
+- Mitigated the vulnerability by properly sanitizing and encoding user input using `htmlspecialchars()`.
 
 ### **Reflection**
 
-Authentication is one of the most critical components of web security. Always use secure methods for password storage, such as hashing, and ensure proper session management to prevent attackers from hijacking sessions or guessing passwords.
+Cross-Site Scripting is a common and dangerous vulnerability, but it can be mitigated effectively by ensuring proper input validation and output encoding. It's important to always validate and sanitize user input, especially when it's displayed back to the user, to prevent malicious attacks.
 
 ---

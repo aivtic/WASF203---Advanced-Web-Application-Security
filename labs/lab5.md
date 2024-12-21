@@ -1,133 +1,165 @@
 
-### **Lab 5: Sensitive Data Exposure**
+### **Lab 5: Broken Access Control**
 
 #### **Objective:**
 In this lab, you will:
-1. Understand the risks associated with sensitive data exposure.
-2. Learn about how attackers can exploit weak data protection mechanisms.
-3. Implement proper encryption and secure communication protocols to protect sensitive data.
+1. Learn about **Broken Access Control** vulnerabilities.
+2. Understand how attackers can exploit these vulnerabilities to access unauthorized resources.
+3. Mitigate access control flaws by implementing proper authorization mechanisms.
 
 ---
 
-### **Task 1: Exploit Sensitive Data Exposure**
+### **Task 1: Exploit Broken Access Control**
 
 #### **Step 1: Set Up the Vulnerable Web Application**
 
-1. **Create a new folder** for the Sensitive Data Exposure lab, e.g., `Lab6_SensitiveDataExposure`.
+1. **Create a new folder** for the Broken Access Control lab, e.g., `Lab8_BrokenAccessControl`.
 2. Inside the folder, create two files:
-   - `login.html` (for the login form)
-   - `process_login.php` (to handle login requests and expose sensitive data)
+   - `admin_dashboard.php` (a page intended for admin users)
+   - `user_dashboard.php` (a page intended for regular users)
+   - `login.php` (a login page where users can authenticate)
 
 #### **Step 2: Implement the Vulnerable Code**
 
-- **login.html**: This file will contain a simple login form where users can enter their username and password. We'll simulate transmitting the data insecurely (without HTTPS) and storing passwords in plain text.
-
-  ```html
-  <!DOCTYPE html>
-  <html lang="en">
-      <head>
-          <meta charset="UTF-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Sensitive Data Exposure Example</title>
-      </head>
-      <body>
-          <h1>Login Form</h1>
-          <form action="process_login.php" method="post">
-              <label for="username">Username:</label>
-              <input type="text" id="username" name="username" required><br>
-              <label for="password">Password:</label>
-              <input type="password" id="password" name="password" required><br>
-              <button type="submit">Login</button>
-          </form>
-      </body>
-  </html>
-  ```
-
-- **process_login.php**: This PHP file will simulate the process of logging in. It will take user credentials and store them in plain text. The password will also be transmitted in an insecure manner (over HTTP instead of HTTPS).
+- **admin_dashboard.php**: This page is intended for admin users but does not properly check if the logged-in user is an admin.
 
   ```php
   <?php
-  // Simulate a database with hardcoded username and password
-  $stored_username = "user";
-  $stored_password = "password123"; // Stored as plain text (vulnerable)
+  session_start();
 
-  // Capture user input
-  $user_input_username = $_POST['username'];
-  $user_input_password = $_POST['password'];
+  // Simulating logged-in user
+  $_SESSION['username'] = 'user';  // Change to 'admin' to simulate an admin login
 
-  // Simulate a login check
-  if ($user_input_username == $stored_username && $user_input_password == $stored_password) {
-      echo "<h2>Welcome, $user_input_username!</h2>";
-      echo "<p>Your sensitive data is now exposed (in plaintext). This is insecure!</p>";
-  } else {
-      echo "<h2>Invalid credentials. Try again.</h2>";
+  if (!isset($_SESSION['username'])) {
+      header("Location: login.php");
+      exit();
+  }
+
+  echo "<h2>Welcome to the Admin Dashboard</h2>";
+  echo "<p>This is a secret admin page!</p>";
+  ?>
+
+  <a href="user_dashboard.php">Go to User Dashboard</a>
+  ```
+
+- **user_dashboard.php**: This page is intended for regular users. However, it doesn't have proper access control, so an attacker can access this page by simply changing the URL.
+
+  ```php
+  <?php
+  session_start();
+
+  // Simulating logged-in user
+  $_SESSION['username'] = 'user';  // You can modify this to simulate admin or other users
+
+  if (!isset($_SESSION['username'])) {
+      header("Location: login.php");
+      exit();
+  }
+
+  echo "<h2>Welcome to the User Dashboard</h2>";
+  echo "<p>This page is for regular users.</p>";
+  ?>
+
+  <a href="admin_dashboard.php">Go to Admin Dashboard</a>
+  ```
+
+- **login.php**: This page allows users to log in but does not check their roles or permissions.
+
+  ```php
+  <?php
+  session_start();
+
+  if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+      $username = $_POST['username'];
+      $password = $_POST['password'];
+
+      // Hardcoded username and password
+      if ($username == 'admin' && $password == 'admin123') {
+          $_SESSION['username'] = 'admin';
+          header("Location: admin_dashboard.php");
+      } elseif ($username == 'user' && $password == 'user123') {
+          $_SESSION['username'] = 'user';
+          header("Location: user_dashboard.php");
+      } else {
+          echo "<p>Invalid credentials</p>";
+      }
   }
   ?>
+
+  <form action="login.php" method="post">
+      <label for="username">Username:</label>
+      <input type="text" id="username" name="username" required><br>
+      <label for="password">Password:</label>
+      <input type="password" id="password" name="password" required><br>
+      <button type="submit">Login</button>
+  </form>
   ```
 
 #### **Step 3: Exploit the Vulnerability**
 
-1. **Test the form**: Open the `login.html` file in a browser and submit the login form using the correct credentials (`username: user`, `password: password123`).
-2. **Observe** that after a successful login, the page displays the user's credentials in plaintext (i.e., the password is not encrypted).
-3. **Test transmitting over HTTP**: Try intercepting the data using a tool like **Wireshark** or **Burp Suite**. Since no encryption is applied, you can see the username and password being transmitted over the network in plain text.
+1. **Login as a user**: Log in with the credentials `user` and `user123`.
+2. **Attempt to access the admin page**: Change the URL to `admin_dashboard.php` in the browser address bar.
+3. **Observe** that the user can access the admin page without proper authorization, demonstrating a **Broken Access Control** vulnerability.
 
 **Reflection Questions**:
-- What are the risks of transmitting sensitive data over HTTP?
-- How could an attacker exploit the lack of encryption during the transmission of sensitive data?
+- What type of access control vulnerability was exploited in this scenario?
+- How could this vulnerability allow an attacker to gain unauthorized access to sensitive resources?
 
 ---
 
-### **Task 2: Mitigate Sensitive Data Exposure**
+### **Task 2: Mitigate Broken Access Control**
 
-#### **Step 1: Implement Secure Transmission with HTTPS**
+#### **Step 1: Implement Proper Access Control**
 
-To mitigate sensitive data exposure, we need to ensure that all sensitive data is transmitted securely. We'll implement HTTPS (SSL/TLS) for secure communication between the client and the server.
+We will now implement proper access control to ensure that only authenticated and authorized users can access the admin dashboard.
 
-1. **Set up SSL/TLS**: If you're running this lab locally, you can use **self-signed certificates** for SSL/TLS, or if you're deploying this on a live server, use a trusted certificate authority (CA).
-   
-2. Modify the **form action** in the `login.html` to use `https` instead of `http`.
-
-   ```html
-   <form action="https://localhost/process_login.php" method="post">
-   ```
-
-3. Ensure your server is configured to use HTTPS. If you're using **Apache**, you can enable SSL by editing the configuration files and pointing to the SSL certificate files.
-
-#### **Step 2: Secure Password Storage Using Hashing**
-
-We need to secure the password storage by using **password hashing** to store passwords in a more secure manner.
-
-1. **Modify** the `process_login.php` file to hash the password using `password_hash()` and then verify it using `password_verify()`.
+1. **Modify the `admin_dashboard.php`** page to check the user's role:
 
    ```php
    <?php
-   // Securely store the password using bcrypt
-   $stored_username = "user";
-   $stored_password_hash = '$2y$10$8N5f6eQmJ0nExI0ktHJ9euX0V/qwjo7ejj64ZPaAlcxL2w5Xhbn3K'; // password123 hashed using bcrypt
+   session_start();
 
-   // Capture user input
-   $user_input_username = $_POST['username'];
-   $user_input_password = $_POST['password'];
-
-   // Check if the user input matches the stored username and the hashed password
-   if ($user_input_username == $stored_username && password_verify($user_input_password, $stored_password_hash)) {
-       echo "<h2>Welcome, $user_input_username!</h2>";
-       echo "<p>Your sensitive data is now protected with hashing and secure transmission.</p>";
-   } else {
-       echo "<h2>Invalid credentials. Try again.</h2>";
+   if (!isset($_SESSION['username'])) {
+       header("Location: login.php");
+       exit();
    }
+
+   // Check if the user is an admin
+   if ($_SESSION['username'] !== 'admin') {
+       echo "<p>Access denied. You are not authorized to view this page.</p>";
+       exit();
+   }
+
+   echo "<h2>Welcome to the Admin Dashboard</h2>";
+   echo "<p>This is a secret admin page!</p>";
    ?>
    ```
 
-#### **Step 3: Test the Mitigated Version**
+2. **Modify the `user_dashboard.php`** page to ensure that it can only be accessed by a logged-in user:
 
-1. **Test with HTTPS**: Make sure that your application now uses HTTPS for secure data transmission. You can verify this by checking for the padlock icon in the browser’s address bar.
-2. **Test the login functionality**: Submit the form using the correct credentials. The page should now securely authenticate the user, and the password will be stored as a hashed value, preventing exposure of sensitive data.
+   ```php
+   <?php
+   session_start();
+
+   if (!isset($_SESSION['username'])) {
+       header("Location: login.php");
+       exit();
+   }
+
+   echo "<h2>Welcome to the User Dashboard</h2>";
+   echo "<p>This page is for regular users.</p>";
+   ?>
+   ```
+
+#### **Step 2: Test the Mitigated Version**
+
+1. **Login as a user**: Log in with the credentials `user` and `user123`.
+2. **Attempt to access the admin page**: Try to access the `admin_dashboard.php` page. You should now see an access denied message, indicating that users without the `admin` role cannot access the admin dashboard.
+3. **Login as an admin**: Log in with the credentials `admin` and `admin123`. You should now be able to access the admin dashboard.
 
 **Reflection Questions**:
-- How does using HTTPS protect the sensitive data transmitted between the client and server?
-- Why is it important to hash passwords before storing them?
-- Can you think of any additional steps to improve the security of sensitive data in this application?
+- How does the implemented access control mechanism prevent unauthorized access?
+- What other techniques can be used to secure access control in web applications (e.g., role-based access control, attribute-based access control)?
 
 ---
 
@@ -135,27 +167,26 @@ We need to secure the password storage by using **password hashing** to store pa
 
 For this assignment, submit the following files:
 
-1. **`login.html`** – The login form with a secure connection (HTTPS).
-2. **`process_login.php`** – The PHP script with both insecure and secure versions (with hashed passwords and HTTPS).
-3. **`README.md`** – A brief explanation document that includes:
-   - A description of the sensitive data exposure vulnerability.
+1. **`admin_dashboard.php`** – The updated admin dashboard page with proper access control.
+2. **`user_dashboard.php`** – The updated user dashboard page.
+3. **`login.php`** – The login page used to authenticate users.
+4. **`README.md`** – A brief explanation document that includes:
+   - A description of the Broken Access Control vulnerability.
    - How you exploited the vulnerability in Task 1.
-   - How you mitigated the vulnerability in Task 2 using HTTPS and password hashing.
-   - Your thoughts on the importance of securing sensitive data.
+   - How you mitigated the vulnerability in Task 2 by implementing proper access control.
+   - Your thoughts on the importance of implementing proper access control.
 
 ---
 
 ### **Summary**
 
 In this lab, you:
-- Learned about **sensitive data exposure** vulnerabilities and their risks.
-- Exploited an insecure login system where passwords were stored in plain text and transmitted over HTTP.
-- Mitigated these vulnerabilities by implementing **HTTPS** for secure communication and **password hashing** for secure password storage.
+- Learned about **Broken Access Control** vulnerabilities and their risks.
+- Exploited a broken access control vulnerability that allowed unauthorized access to the admin dashboard.
+- Mitigated the vulnerability by implementing role-based access control, ensuring that only authorized users can access sensitive resources.
 
 ### **Reflection**
 
-Protecting sensitive data is critical to maintaining the integrity and trustworthiness of your application. Always ensure that sensitive data is transmitted securely using HTTPS and stored securely using techniques like password hashing.
+Broken access control vulnerabilities can lead to serious security issues, including unauthorized access to sensitive data and administrative functionality. Always implement proper access control mechanisms to ensure that users only have access to the resources and actions they are authorized for.
 
 ---
-
-Let me know if you need any further details or if you'd like to move on to the next topic!

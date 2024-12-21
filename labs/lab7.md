@@ -1,165 +1,123 @@
 
-### **Lab 7: Broken Access Control**
+### **Lab 7: Security Misconfiguration**
 
 #### **Objective:**
 In this lab, you will:
-1. Learn about **Broken Access Control** vulnerabilities.
-2. Understand how attackers can exploit these vulnerabilities to access unauthorized resources.
-3. Mitigate access control flaws by implementing proper authorization mechanisms.
+1. Understand what **Security Misconfiguration** vulnerabilities are.
+2. Identify common security misconfigurations in web applications.
+3. Mitigate security misconfigurations through proper configurations and hardening.
 
 ---
 
-### **Task 1: Exploit Broken Access Control**
+### **Task 1: Exploit Security Misconfiguration**
 
 #### **Step 1: Set Up the Vulnerable Web Application**
 
-1. **Create a new folder** for the Broken Access Control lab, e.g., `Lab8_BrokenAccessControl`.
-2. Inside the folder, create two files:
-   - `admin_dashboard.php` (a page intended for admin users)
-   - `user_dashboard.php` (a page intended for regular users)
-   - `login.php` (a login page where users can authenticate)
+1. **Create a new folder** for the Security Misconfiguration lab, e.g., `Lab9_SecurityMisconfiguration`.
+2. Inside the folder, create the following files:
+   - `index.php` (a basic page of the web application)
+   - `.htaccess` (an insecure `.htaccess` file)
+   - `config.php` (a configuration file with sensitive information)
 
 #### **Step 2: Implement the Vulnerable Code**
 
-- **admin_dashboard.php**: This page is intended for admin users but does not properly check if the logged-in user is an admin.
+- **index.php**: This is a simple web page that simulates a login screen and displays some sensitive information.
 
   ```php
   <?php
+  // Check if the user is logged in
   session_start();
-
-  // Simulating logged-in user
-  $_SESSION['username'] = 'user';  // Change to 'admin' to simulate an admin login
 
   if (!isset($_SESSION['username'])) {
-      header("Location: login.php");
-      exit();
+      echo "<p>Please log in to view the page.</p>";
+  } else {
+      echo "<h2>Welcome to the User Dashboard</h2>";
+      echo "<p>This page is for logged-in users.</p>";
   }
-
-  echo "<h2>Welcome to the Admin Dashboard</h2>";
-  echo "<p>This is a secret admin page!</p>";
   ?>
-
-  <a href="user_dashboard.php">Go to User Dashboard</a>
   ```
 
-- **user_dashboard.php**: This page is intended for regular users. However, it doesn't have proper access control, so an attacker can access this page by simply changing the URL.
+- **.htaccess**: This file, if not properly configured, can expose sensitive files or allow unauthorized access to certain parts of the application. This is a basic misconfiguration where the file is accessible from the web.
+
+  ```
+  # .htaccess with improper configurations
+  # This file should restrict access to sensitive files, but it is left open to the public
+
+  <Files ".ht*">
+      Order Allow,Deny
+      Deny from all
+  </Files>
+
+  # But it's missing the configuration to block access to files such as 'config.php'
+  ```
+
+- **config.php**: This file contains sensitive information such as database credentials. In a misconfigured environment, such files could be exposed to attackers.
 
   ```php
   <?php
-  session_start();
-
-  // Simulating logged-in user
-  $_SESSION['username'] = 'user';  // You can modify this to simulate admin or other users
-
-  if (!isset($_SESSION['username'])) {
-      header("Location: login.php");
-      exit();
-  }
-
-  echo "<h2>Welcome to the User Dashboard</h2>";
-  echo "<p>This page is for regular users.</p>";
-  ?>
-
-  <a href="admin_dashboard.php">Go to Admin Dashboard</a>
-  ```
-
-- **login.php**: This page allows users to log in but does not check their roles or permissions.
-
-  ```php
-  <?php
-  session_start();
-
-  if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-      $username = $_POST['username'];
-      $password = $_POST['password'];
-
-      // Hardcoded username and password
-      if ($username == 'admin' && $password == 'admin123') {
-          $_SESSION['username'] = 'admin';
-          header("Location: admin_dashboard.php");
-      } elseif ($username == 'user' && $password == 'user123') {
-          $_SESSION['username'] = 'user';
-          header("Location: user_dashboard.php");
-      } else {
-          echo "<p>Invalid credentials</p>";
-      }
-  }
-  ?>
-
-  <form action="login.php" method="post">
-      <label for="username">Username:</label>
-      <input type="text" id="username" name="username" required><br>
-      <label for="password">Password:</label>
-      <input type="password" id="password" name="password" required><br>
-      <button type="submit">Login</button>
-  </form>
+  // Database credentials – this file should NOT be publicly accessible
+  $db_host = 'localhost';
+  $db_user = 'root';
+  $db_pass = 'password';
+  $db_name = 'mydatabase';
   ```
 
 #### **Step 3: Exploit the Vulnerability**
 
-1. **Login as a user**: Log in with the credentials `user` and `user123`.
-2. **Attempt to access the admin page**: Change the URL to `admin_dashboard.php` in the browser address bar.
-3. **Observe** that the user can access the admin page without proper authorization, demonstrating a **Broken Access Control** vulnerability.
+1. **Access `.htaccess`**: Try to access the `.htaccess` file directly through the browser by navigating to `http://localhost/.htaccess`. This should not be allowed, but in case the configuration is incorrect, you may be able to view its content.
+   
+2. **Access `config.php`**: Try to access the `config.php` file directly by navigating to `http://localhost/config.php`. If the file is misconfigured and publicly accessible, you will see the sensitive database credentials.
 
 **Reflection Questions**:
-- What type of access control vulnerability was exploited in this scenario?
-- How could this vulnerability allow an attacker to gain unauthorized access to sensitive resources?
+- What kind of sensitive information can attackers gain by exploiting misconfigurations?
+- How can access to `.htaccess` or `config.php` be restricted to prevent unauthorized access?
 
 ---
 
-### **Task 2: Mitigate Broken Access Control**
+### **Task 2: Mitigate Security Misconfiguration**
 
-#### **Step 1: Implement Proper Access Control**
+#### **Step 1: Correctly Configure `.htaccess`**
 
-We will now implement proper access control to ensure that only authenticated and authorized users can access the admin dashboard.
+To mitigate this misconfiguration, you should prevent access to sensitive files like `.htaccess` and `config.php`. Here's how to properly secure the `.htaccess` file:
 
-1. **Modify the `admin_dashboard.php`** page to check the user's role:
+1. **Update the `.htaccess` file** to restrict access to sensitive files:
 
-   ```php
-   <?php
-   session_start();
+   ```
+   # .htaccess with proper security configurations
+   # Restrict access to sensitive files
+   <Files ".ht*">
+       Order Allow,Deny
+       Deny from all
+   </Files>
 
-   if (!isset($_SESSION['username'])) {
-       header("Location: login.php");
-       exit();
-   }
-
-   // Check if the user is an admin
-   if ($_SESSION['username'] !== 'admin') {
-       echo "<p>Access denied. You are not authorized to view this page.</p>";
-       exit();
-   }
-
-   echo "<h2>Welcome to the Admin Dashboard</h2>";
-   echo "<p>This is a secret admin page!</p>";
-   ?>
+   <Files "config.php">
+       Order Allow,Deny
+       Deny from all
+   </Files>
    ```
 
-2. **Modify the `user_dashboard.php`** page to ensure that it can only be accessed by a logged-in user:
+#### **Step 2: Secure the `config.php` File**
+
+1. **Move the `config.php` file** to a location outside of the publicly accessible web root directory (e.g., a `config` directory that is not directly accessible via the web).
+
+2. **Modify the path** in your PHP application to point to the new location of the `config.php` file. For example, if you move `config.php` to the parent directory, update the `index.php` or any other file that uses it:
 
    ```php
-   <?php
-   session_start();
-
-   if (!isset($_SESSION['username'])) {
-       header("Location: login.php");
-       exit();
-   }
-
-   echo "<h2>Welcome to the User Dashboard</h2>";
-   echo "<p>This page is for regular users.</p>";
-   ?>
+   // Include the config file from the new location outside the public web root
+   include('../config/config.php');
    ```
 
-#### **Step 2: Test the Mitigated Version**
+3. **Check the file permissions** of sensitive files to ensure they are only readable by authorized users (e.g., your web server and administrators).
 
-1. **Login as a user**: Log in with the credentials `user` and `user123`.
-2. **Attempt to access the admin page**: Try to access the `admin_dashboard.php` page. You should now see an access denied message, indicating that users without the `admin` role cannot access the admin dashboard.
-3. **Login as an admin**: Log in with the credentials `admin` and `admin123`. You should now be able to access the admin dashboard.
+#### **Step 3: Test the Mitigated Version**
+
+1. **Test the `.htaccess` configuration**: Try accessing the `.htaccess` file or the `config.php` file directly through the browser. Both should now return a "Forbidden" message, preventing unauthorized access.
+   
+2. **Test the `config.php` file**: Ensure that the `config.php` file is no longer accessible via the web browser by trying to access it directly. If properly configured, you should see a 403 Forbidden error.
 
 **Reflection Questions**:
-- How does the implemented access control mechanism prevent unauthorized access?
-- What other techniques can be used to secure access control in web applications (e.g., role-based access control, attribute-based access control)?
+- How did moving the `config.php` file out of the public web root improve security?
+- How do proper file permissions and access control contribute to the overall security of the web application?
 
 ---
 
@@ -167,26 +125,26 @@ We will now implement proper access control to ensure that only authenticated an
 
 For this assignment, submit the following files:
 
-1. **`admin_dashboard.php`** – The updated admin dashboard page with proper access control.
-2. **`user_dashboard.php`** – The updated user dashboard page.
-3. **`login.php`** – The login page used to authenticate users.
+1. **`.htaccess`** – The updated `.htaccess` file with proper security configurations.
+2. **`config.php`** – The updated configuration file (if moved, make sure to include the new path and relevant changes).
+3. **`index.php`** – The updated index page that uses the properly secured `config.php`.
 4. **`README.md`** – A brief explanation document that includes:
-   - A description of the Broken Access Control vulnerability.
+   - A description of the Security Misconfiguration vulnerability.
    - How you exploited the vulnerability in Task 1.
-   - How you mitigated the vulnerability in Task 2 by implementing proper access control.
-   - Your thoughts on the importance of implementing proper access control.
+   - How you mitigated the vulnerability in Task 2 by securing the `.htaccess` file and `config.php`.
+   - Your thoughts on the importance of proper configuration management.
 
 ---
 
 ### **Summary**
 
 In this lab, you:
-- Learned about **Broken Access Control** vulnerabilities and their risks.
-- Exploited a broken access control vulnerability that allowed unauthorized access to the admin dashboard.
-- Mitigated the vulnerability by implementing role-based access control, ensuring that only authorized users can access sensitive resources.
+- Learned about **Security Misconfiguration** vulnerabilities and their risks.
+- Exploited a misconfiguration where sensitive files like `.htaccess` and `config.php` were publicly accessible.
+- Mitigated the misconfiguration by securing access to sensitive files and properly configuring the `.htaccess` file.
 
 ### **Reflection**
 
-Broken access control vulnerabilities can lead to serious security issues, including unauthorized access to sensitive data and administrative functionality. Always implement proper access control mechanisms to ensure that users only have access to the resources and actions they are authorized for.
+Security misconfigurations are a common vulnerability in many web applications. By ensuring that files containing sensitive information are properly protected and not accessible from the web, you can significantly reduce the risk of exploitation.
 
 ---

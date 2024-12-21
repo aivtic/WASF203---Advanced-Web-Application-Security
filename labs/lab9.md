@@ -1,93 +1,133 @@
 
-### **Lab 9: Cross-Site Scripting (XSS)**
+### **Lab 9: Sensitive Data Exposure**
 
 #### **Objective:**
 In this lab, you will:
-1. Learn about **Cross-Site Scripting (XSS)** vulnerabilities.
-2. Understand how attackers exploit XSS to execute scripts in users' browsers.
-3. Mitigate XSS vulnerabilities through proper input validation and output encoding.
+1. Understand the risks associated with sensitive data exposure.
+2. Learn about how attackers can exploit weak data protection mechanisms.
+3. Implement proper encryption and secure communication protocols to protect sensitive data.
 
 ---
 
-### **Task 1: Exploit Cross-Site Scripting (XSS)**
+### **Task 1: Exploit Sensitive Data Exposure**
 
 #### **Step 1: Set Up the Vulnerable Web Application**
 
-1. **Create a new folder** for the XSS lab, e.g., `Lab10_XSS`.
-2. Inside the folder, create the following files:
-   - `index.php` (a page to simulate an input form and display user-submitted content)
-   - `xss_form.php` (a page where the user submits input)
-   - `xss_output.php` (a page that shows the content submitted by the user)
+1. **Create a new folder** for the Sensitive Data Exposure lab, e.g., `Lab6_SensitiveDataExposure`.
+2. Inside the folder, create two files:
+   - `login.html` (for the login form)
+   - `process_login.php` (to handle login requests and expose sensitive data)
 
 #### **Step 2: Implement the Vulnerable Code**
 
-- **index.php**: This page contains a simple input form where users can submit their names.
+- **login.html**: This file will contain a simple login form where users can enter their username and password. We'll simulate transmitting the data insecurely (without HTTPS) and storing passwords in plain text.
 
-  ```php
-  <form action="xss_form.php" method="post">
-      <label for="name">Enter your name:</label>
-      <input type="text" id="name" name="name" required><br>
-      <button type="submit">Submit</button>
-  </form>
+  ```html
+  <!DOCTYPE html>
+  <html lang="en">
+      <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Sensitive Data Exposure Example</title>
+      </head>
+      <body>
+          <h1>Login Form</h1>
+          <form action="process_login.php" method="post">
+              <label for="username">Username:</label>
+              <input type="text" id="username" name="username" required><br>
+              <label for="password">Password:</label>
+              <input type="password" id="password" name="password" required><br>
+              <button type="submit">Login</button>
+          </form>
+      </body>
+  </html>
   ```
 
-- **xss_form.php**: This page takes user input and submits it without validating or sanitizing it, creating a potential XSS vulnerability.
+- **process_login.php**: This PHP file will simulate the process of logging in. It will take user credentials and store them in plain text. The password will also be transmitted in an insecure manner (over HTTP instead of HTTPS).
 
   ```php
   <?php
-  if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-      $name = $_POST['name'];  // Directly using user input without sanitizing
+  // Simulate a database with hardcoded username and password
+  $stored_username = "user";
+  $stored_password = "password123"; // Stored as plain text (vulnerable)
 
-      // Vulnerability: XSS
-      echo "<p>Hello, $name!</p>";  // User input is directly displayed on the page without escaping
+  // Capture user input
+  $user_input_username = $_POST['username'];
+  $user_input_password = $_POST['password'];
+
+  // Simulate a login check
+  if ($user_input_username == $stored_username && $user_input_password == $stored_password) {
+      echo "<h2>Welcome, $user_input_username!</h2>";
+      echo "<p>Your sensitive data is now exposed (in plaintext). This is insecure!</p>";
+  } else {
+      echo "<h2>Invalid credentials. Try again.</h2>";
   }
   ?>
   ```
 
 #### **Step 3: Exploit the Vulnerability**
 
-1. **Submit a malicious payload**: In the form on the `index.php` page, enter the following payload:
-
-   ```html
-   <script>alert('XSS Attack!');</script>
-   ```
-
-2. **Observe the result**: When the form is submitted, the script will execute in the browser and display an alert, demonstrating a **Cross-Site Scripting (XSS)** vulnerability.
+1. **Test the form**: Open the `login.html` file in a browser and submit the login form using the correct credentials (`username: user`, `password: password123`).
+2. **Observe** that after a successful login, the page displays the user's credentials in plaintext (i.e., the password is not encrypted).
+3. **Test transmitting over HTTP**: Try intercepting the data using a tool like **Wireshark** or **Burp Suite**. Since no encryption is applied, you can see the username and password being transmitted over the network in plain text.
 
 **Reflection Questions**:
-- What happens when a malicious script is injected into the input field?
-- How can this attack be used to steal session cookies or redirect users to malicious websites?
+- What are the risks of transmitting sensitive data over HTTP?
+- How could an attacker exploit the lack of encryption during the transmission of sensitive data?
 
 ---
 
-### **Task 2: Mitigate Cross-Site Scripting (XSS)**
+### **Task 2: Mitigate Sensitive Data Exposure**
 
-#### **Step 1: Implement Input Validation and Output Encoding**
+#### **Step 1: Implement Secure Transmission with HTTPS**
 
-To mitigate the XSS vulnerability, we will sanitize user input and ensure that user-submitted content is displayed safely.
+To mitigate sensitive data exposure, we need to ensure that all sensitive data is transmitted securely. We'll implement HTTPS (SSL/TLS) for secure communication between the client and the server.
 
-1. **Modify the `xss_form.php`** page to escape user input before displaying it:
+1. **Set up SSL/TLS**: If you're running this lab locally, you can use **self-signed certificates** for SSL/TLS, or if you're deploying this on a live server, use a trusted certificate authority (CA).
+   
+2. Modify the **form action** in the `login.html` to use `https` instead of `http`.
+
+   ```html
+   <form action="https://localhost/process_login.php" method="post">
+   ```
+
+3. Ensure your server is configured to use HTTPS. If you're using **Apache**, you can enable SSL by editing the configuration files and pointing to the SSL certificate files.
+
+#### **Step 2: Secure Password Storage Using Hashing**
+
+We need to secure the password storage by using **password hashing** to store passwords in a more secure manner.
+
+1. **Modify** the `process_login.php` file to hash the password using `password_hash()` and then verify it using `password_verify()`.
 
    ```php
    <?php
-   if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-       $name = htmlspecialchars($_POST['name'], ENT_QUOTES, 'UTF-8');  // Sanitize user input
+   // Securely store the password using bcrypt
+   $stored_username = "user";
+   $stored_password_hash = '$2y$10$8N5f6eQmJ0nExI0ktHJ9euX0V/qwjo7ejj64ZPaAlcxL2w5Xhbn3K'; // password123 hashed using bcrypt
 
-       echo "<p>Hello, $name!</p>";  // Output the sanitized input
+   // Capture user input
+   $user_input_username = $_POST['username'];
+   $user_input_password = $_POST['password'];
+
+   // Check if the user input matches the stored username and the hashed password
+   if ($user_input_username == $stored_username && password_verify($user_input_password, $stored_password_hash)) {
+       echo "<h2>Welcome, $user_input_username!</h2>";
+       echo "<p>Your sensitive data is now protected with hashing and secure transmission.</p>";
+   } else {
+       echo "<h2>Invalid credentials. Try again.</h2>";
    }
    ?>
    ```
 
-   The `htmlspecialchars()` function encodes special characters such as `<`, `>`, and `&` to their HTML entity equivalents, preventing any HTML or JavaScript from being executed.
+#### **Step 3: Test the Mitigated Version**
 
-#### **Step 2: Test the Mitigated Version**
-
-1. **Submit the malicious payload again**: Enter the same XSS payload (`<script>alert('XSS Attack!');</script>`) in the form and submit it.
-2. **Observe the result**: This time, the input will be sanitized, and the script will not execute. Instead, the text will be displayed as plain text (`&lt;script&gt;alert('XSS Attack!');&lt;/script&gt;`), demonstrating proper output encoding and protection against XSS.
+1. **Test with HTTPS**: Make sure that your application now uses HTTPS for secure data transmission. You can verify this by checking for the padlock icon in the browser’s address bar.
+2. **Test the login functionality**: Submit the form using the correct credentials. The page should now securely authenticate the user, and the password will be stored as a hashed value, preventing exposure of sensitive data.
 
 **Reflection Questions**:
-- How did sanitizing the user input prevent the XSS attack?
-- What is the importance of using output encoding in preventing XSS vulnerabilities?
+- How does using HTTPS protect the sensitive data transmitted between the client and server?
+- Why is it important to hash passwords before storing them?
+- Can you think of any additional steps to improve the security of sensitive data in this application?
 
 ---
 
@@ -95,25 +135,27 @@ To mitigate the XSS vulnerability, we will sanitize user input and ensure that u
 
 For this assignment, submit the following files:
 
-1. **`index.php`** – The input form page.
-2. **`xss_form.php`** – The page where user input is displayed (before and after mitigation).
+1. **`login.html`** – The login form with a secure connection (HTTPS).
+2. **`process_login.php`** – The PHP script with both insecure and secure versions (with hashed passwords and HTTPS).
 3. **`README.md`** – A brief explanation document that includes:
-   - A description of Cross-Site Scripting (XSS) vulnerabilities.
+   - A description of the sensitive data exposure vulnerability.
    - How you exploited the vulnerability in Task 1.
-   - How you mitigated the vulnerability in Task 2 by sanitizing and encoding user input.
-   - Your thoughts on the importance of input validation and output encoding in preventing XSS.
+   - How you mitigated the vulnerability in Task 2 using HTTPS and password hashing.
+   - Your thoughts on the importance of securing sensitive data.
 
 ---
 
 ### **Summary**
 
 In this lab, you:
-- Learned about **Cross-Site Scripting (XSS)** vulnerabilities and their risks.
-- Exploited an XSS vulnerability by injecting a malicious script through a form input.
-- Mitigated the vulnerability by properly sanitizing and encoding user input using `htmlspecialchars()`.
+- Learned about **sensitive data exposure** vulnerabilities and their risks.
+- Exploited an insecure login system where passwords were stored in plain text and transmitted over HTTP.
+- Mitigated these vulnerabilities by implementing **HTTPS** for secure communication and **password hashing** for secure password storage.
 
 ### **Reflection**
 
-Cross-Site Scripting is a common and dangerous vulnerability, but it can be mitigated effectively by ensuring proper input validation and output encoding. It's important to always validate and sanitize user input, especially when it's displayed back to the user, to prevent malicious attacks.
+Protecting sensitive data is critical to maintaining the integrity and trustworthiness of your application. Always ensure that sensitive data is transmitted securely using HTTPS and stored securely using techniques like password hashing.
 
 ---
+
+Let me know if you need any further details or if you'd like to move on to the next topic!

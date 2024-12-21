@@ -1,124 +1,165 @@
 
 
-### **Lab 13: Insecure Direct Object References (IDOR)**
+### **Lab 13: Session Hijacking and Mitigation**
 
 #### **Objective:**
 In this lab, you will:
-1. Learn about Insecure Direct Object References (IDOR) vulnerabilities.
-2. Identify and exploit IDOR vulnerabilities in a web application.
-3. Implement proper access controls to prevent IDOR vulnerabilities.
+1. Understand how session hijacking attacks work.
+2. Simulate a session hijacking attack.
+3. Implement security measures to prevent session hijacking.
 
 ---
 
-### **Task 1: Simulate an IDOR Vulnerability**
+### **Task 1: Simulate Session Hijacking**
 
-#### **Step 1: Create a Simple PHP Application**
+#### **Step 1: Create a Simple Login System**
 
-1. Create a new folder for this lab, for example, `Lab15_IDOR`.
+1. Create a new folder for this lab, for example, `Lab16_Session_Hijacking`.
 
-2. Inside this folder, create a file called `profile.php` where the user can access their profile page by passing their user ID in the URL.
+2. Inside this folder, create a file called `login.php` where the user can log in with a username and password. The application will use PHP sessions to store login data.
 
-Example of `profile.php`:
+Example `login.php`:
 
 ```php
 <?php
 session_start();
 
-// Simulated user data
 $users = [
-    1 => ['username' => 'john_doe', 'email' => 'john@example.com'],
-    2 => ['username' => 'jane_smith', 'email' => 'jane@example.com'],
-    3 => ['username' => 'bob_jones', 'email' => 'bob@example.com'],
+    'admin' => 'password123',
+    'user1' => 'password456'
 ];
 
-// Simulate a user being logged in with ID 1
-$_SESSION['user_id'] = 1;
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $username = $_POST['username'];
+    $password = $_POST['password'];
 
-// Get the user ID from the URL
-$user_id = isset($_GET['user_id']) ? $_GET['user_id'] : null;
-
-if ($user_id && isset($users[$user_id])) {
-    // Display user profile
-    echo "<h1>User Profile</h1>";
-    echo "<p>Username: " . $users[$user_id]['username'] . "</p>";
-    echo "<p>Email: " . $users[$user_id]['email'] . "</p>";
-} else {
-    echo "<h1>Invalid User ID</h1>";
+    // Check if the username and password match
+    if (isset($users[$username]) && $users[$username] === $password) {
+        $_SESSION['username'] = $username;
+        echo "<h1>Welcome, " . $username . "!</h1>";
+        echo "<a href='profile.php'>Go to Profile</a>";
+    } else {
+        echo "<h1>Invalid credentials!</h1>";
+    }
 }
 ?>
+
+<form method="POST">
+    <label for="username">Username:</label>
+    <input type="text" id="username" name="username" required><br>
+    <label for="password">Password:</label>
+    <input type="password" id="password" name="password" required><br>
+    <button type="submit">Login</button>
+</form>
 ```
 
-#### **Step 2: Simulate the Vulnerability**
+#### **Step 2: Create a Profile Page**
 
-1. Start the application by opening `profile.php` in a browser.
-2. Access the profile of user 1 by navigating to `profile.php?user_id=1`.
-3. Now, try accessing the profiles of users 2 and 3 by changing the URL:
-   - `profile.php?user_id=2`
-   - `profile.php?user_id=3`
+Create a file called `profile.php` to simulate the user's profile page, which can only be accessed after logging in.
 
-In this scenario, a user can access the profiles of other users by directly manipulating the `user_id` parameter in the URL. This is an **Insecure Direct Object Reference (IDOR)** vulnerability because the application does not verify if the logged-in user is authorized to access the data of other users.
-
-#### **Step 3: Exploit the IDOR Vulnerability**
-
-As an attacker, you can now access other users' profiles simply by changing the `user_id` in the URL. For example:
-- Accessing `profile.php?user_id=2` will show Jane's profile, even if you're logged in as John.
-- Similarly, accessing `profile.php?user_id=3` will show Bob's profile.
-
----
-
-### **Task 2: Fixing the IDOR Vulnerability**
-
-#### **Step 1: Implement Access Control**
-
-To fix the IDOR vulnerability, we need to implement access control to ensure that a user can only access their own data.
-
-Modify the `profile.php` file to check if the logged-in user matches the `user_id` parameter. If not, deny access.
-
-Updated `profile.php`:
+Example `profile.php`:
 
 ```php
 <?php
 session_start();
 
-// Simulated user data
-$users = [
-    1 => ['username' => 'john_doe', 'email' => 'john@example.com'],
-    2 => ['username' => 'jane_smith', 'email' => 'jane@example.com'],
-    3 => ['username' => 'bob_jones', 'email' => 'bob@example.com'],
-];
-
-// Simulate a user being logged in with ID 1
-$_SESSION['user_id'] = 1;
-
-// Get the user ID from the URL
-$user_id = isset($_GET['user_id']) ? $_GET['user_id'] : null;
-
-// Check if the user is trying to access their own profile
-if ($user_id && $user_id == $_SESSION['user_id'] && isset($users[$user_id])) {
-    // Display user profile
-    echo "<h1>User Profile</h1>";
-    echo "<p>Username: " . $users[$user_id]['username'] . "</p>";
-    echo "<p>Email: " . $users[$user_id]['email'] . "</p>";
+if (!isset($_SESSION['username'])) {
+    echo "<h1>You must log in to view your profile!</h1>";
+    echo "<a href='login.php'>Login</a>";
 } else {
-    echo "<h1>Access Denied: You can only view your own profile.</h1>";
+    echo "<h1>Welcome to your profile, " . $_SESSION['username'] . "!</h1>";
+    echo "<a href='logout.php'>Logout</a>";
 }
 ?>
 ```
 
-#### **Step 2: Test the Fixed Application**
+#### **Step 3: Simulate Session Hijacking**
 
-1. Now, try accessing the profile of other users:
-   - `profile.php?user_id=1` – This should show your own profile (as the logged-in user).
-   - `profile.php?user_id=2` – This should show "Access Denied" because you are not authorized to view Jane's profile.
-   - `profile.php?user_id=3` – This should show "Access Denied" because you are not authorized to view Bob's profile.
+1. Open `login.php` in a browser and log in with any user (e.g., `admin` with `password123`).
+2. After logging in, copy the **Session ID** from your browser's cookies (usually found in Developer Tools → Application → Cookies).
+3. Open an Incognito window in your browser or a different browser.
+4. In the new window, manually set the Session ID (using the copied session ID) in the cookies to simulate hijacking the session.
+5. Navigate to `profile.php` in the new window. If successful, you should now have access to the original user's profile without having logged in.
+
+This demonstrates how an attacker can hijack a session by stealing the session ID, which is stored in cookies and used to authenticate the user.
+
+---
+
+### **Task 2: Mitigate Session Hijacking**
+
+#### **Step 1: Implement Session Security Measures**
+
+1. **Use `secure` and `HttpOnly` flags for cookies**: These flags ensure that the session cookie is only sent over secure HTTPS connections and cannot be accessed by JavaScript, reducing the risk of session hijacking.
+
+In your `login.php` file, set the session cookie flags when starting the session:
+
+```php
+<?php
+session_set_cookie_params([
+    'lifetime' => 0, 
+    'path' => '/', 
+    'domain' => '', 
+    'secure' => true, // Ensures cookie is sent only over HTTPS
+    'httponly' => true, // Makes cookie inaccessible to JavaScript
+    'samesite' => 'Strict' // Prevents cross-site request forgery
+]);
+
+session_start();
+
+// Existing login code...
+```
+
+2. **Regenerate Session ID After Login**: To prevent session fixation (where the attacker can force the session ID), regenerate the session ID after the user successfully logs in:
+
+```php
+<?php
+session_start();
+
+// Regenerate the session ID
+session_regenerate_id(true);
+
+// Existing login code...
+```
+
+3. **Set a Session Timeout**: To ensure that sessions are not valid indefinitely, set a timeout for sessions. You can configure this in your `php.ini` or manage it programmatically by checking the session time.
+
+```php
+<?php
+session_start();
+
+// Set session timeout duration (e.g., 15 minutes)
+$timeout_duration = 900; // 15 minutes
+
+if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity']) > $timeout_duration) {
+    session_unset();     // Unset session variables
+    session_destroy();   // Destroy the session
+    echo "<h1>Your session has expired. Please log in again.</h1>";
+} else {
+    $_SESSION['last_activity'] = time(); // Update last activity time
+}
+
+// Existing profile code...
+```
+
+4. **Use HTTPS**: Ensure that the website uses HTTPS to encrypt all communication, including the session cookie, to prevent man-in-the-middle attacks.
+
+---
+
+### **Task 3: Test the Mitigation Measures**
+
+1. **Test Session Hijacking**: After implementing the security measures, repeat the session hijacking test by copying the session ID from one browser and setting it in another browser.
+   - **Expected Result**: The session hijacking attempt should fail because the session ID is now regenerated after login, and the `secure` and `HttpOnly` flags will prevent the cookie from being accessed or sent over an insecure connection.
+
+2. **Test Session Timeout**: Log in and leave the session idle for longer than the configured timeout (e.g., 15 minutes).
+   - **Expected Result**: The session should expire automatically, and you'll need to log in again.
 
 ---
 
 ### **Reflection Questions:**
 
-1. **What is IDOR, and how can it impact a web application?**
-2. **How did the lack of access control in the original code lead to an IDOR vulnerability?**
-3. **How did you fix the vulnerability, and what security measure was implemented to prevent unauthorized access?**
+1. **How does session hijacking work, and why is it a critical vulnerability?**
+2. **What security measures did you implement to mitigate session hijacking?**
+3. **Why is it important to use secure flags for cookies and regenerate the session ID after login?**
 
 ---
 
@@ -126,20 +167,23 @@ if ($user_id && $user_id == $_SESSION['user_id'] && isset($users[$user_id])) {
 
 For this assignment, submit the following:
 
-1. **`profile.php`** – The original file containing the IDOR vulnerability.
-2. **`profile.php`** – The updated file with the IDOR vulnerability fixed using access control.
-3. **`README.md`** – A brief explanation of:
-   - What IDOR vulnerabilities are and how they are exploited.
-   - How you fixed the vulnerability by implementing access control.
+1. **`login.php`** – The file with the original session hijacking vulnerability.
+2. **`login.php`** – The updated file with session hijacking mitigations (e.g., `secure`, `HttpOnly` flags, session regeneration).
+3. **`profile.php`** – The user profile page.
+4. **`README.md`** – A brief explanation of:
+   - How session hijacking works and how it was simulated.
+   - The security measures implemented to mitigate the risk.
+   - Testing results showing that session hijacking was prevented.
 
 ---
 
 ### **Summary**
 
 In this lab, you:
-- Learned about Insecure Direct Object References (IDOR) and how attackers can exploit this vulnerability by manipulating parameters in the URL.
-- Implemented access control to fix the IDOR vulnerability, ensuring that users can only access their own data.
+- Simulated a session hijacking attack and exploited it to access another user's session.
+- Implemented several session security best practices, including regenerating session IDs, using `secure` and `HttpOnly` cookies, and setting session timeouts.
+- Tested the mitigation measures to ensure that session hijacking could not be exploited.
 
 ---
 
-Let me know if you're ready to proceed or if you need further details!
+Let me know if you're ready to move to the next lab or need more details!
