@@ -1,6 +1,6 @@
 
 
-## **Advanced SQL Injection Lab**
+## **Lab 1: Advanced SQL Injection Lab**
 
 ### **Objective:**
 This lab will cover advanced SQL injection techniques including:

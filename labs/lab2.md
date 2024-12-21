@@ -1,6 +1,6 @@
 
 
-### **Assignment 2: HTML Injection**
+### **Lab 2: HTML Injection**
 
 #### **Objective:**
 In this assignment, you will:
