@@ -32,7 +32,6 @@ Mr. Aminu Idris brings extensive expertise in cybersecurity, digital forensics, 
 | Lab 14.0      | [Lab - IDOR (Insecure Direct Object Reference) Exploitation](labs/lab14.md)                                | Mandatory       |
 | Lab 15.0      | [Lab - XML External Entity (XXE) Vulnerability](labs/lab15.md)                                | Mandatory       |
 | Lab 16.0      | [Capstone Project - Live Vulnerable Web Application Hosting](labs/lab16.md)                                | Mandatory       |
-
 | Lab 17.0      | [Capstone Project - Presentation and Security Review](labs/lab17.md)                                       | Mandatory       |
 
 
