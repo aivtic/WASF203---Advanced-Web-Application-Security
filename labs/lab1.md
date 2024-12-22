@@ -270,18 +270,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET' && isset($_GET['search'])) {
 ### **Step 3: Exploit SQL Injection Vulnerabilities**
 
 #### **1. Error-based SQL Injection**
-- Go to **search.php** and enter this payload into the search box: `' UNION SELECT NULL, NULL, NULL --`.
+- Go to **search.php** and enter this payload into the search box: `' UNION SELECT NULL, NULL, NULL #`.
 - This should trigger a SQL error or data leakage if the application is improperly handling SQL errors.
 
 #### **2. Time-based Blind SQL Injection**
 - Go to **login.php** and try entering this payload into the username field: `' OR SLEEP(
 
-5) --`.
+5) #`.
 - The page will delay for 5 seconds if the injection is successful.
 
 #### **3. Second-order SQL Injection**
-- Go to **register.php** and try this payload: `admin' --` in the username field.
-- Log in with `admin' --` as the username and observe that the application fails to properly filter input data.
+- Go to **register.php** and try this payload: `admin' #` in the username field.
+- Log in with `admin' #` as the username and observe that the application fails to properly filter input data.
 
 ---
 
