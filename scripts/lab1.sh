@@ -1,8 +1,7 @@
 #!/bin/bash
 
 # Check if XAMPP is installed
-if ! command -v xampp &> /dev/null
-then
+if [ ! -f /opt/lampp/lampp ]; then
     echo "XAMPP could not be found. Please install XAMPP first."
     exit 1
 fi
@@ -59,7 +58,6 @@ echo "$SQL_COMMANDS" | sudo "$XAMPP_PATH/bin/mysql" -u "$DB_USER" -p"$DB_PASS"
 # Step 2: Create the vulnerable PHP files for the app
 echo "Creating the PHP files for the web application..."
 
-# Create the index.php file
 cat <<EOL > "$DOCUMENT_ROOT/$APP_NAME/index.php"
 <!DOCTYPE html>
 <html lang="en">
@@ -78,7 +76,6 @@ cat <<EOL > "$DOCUMENT_ROOT/$APP_NAME/index.php"
 </html>
 EOL
 
-# Create the config.php file
 cat <<EOL > "$DOCUMENT_ROOT/$APP_NAME/config.php"
 <?php
 \$servername = "localhost";
@@ -93,7 +90,6 @@ if (\$conn->connect_error) {
 ?>
 EOL
 
-# Create the db.php file
 cat <<EOL > "$DOCUMENT_ROOT/$APP_NAME/db.php"
 <?php
 include 'config.php';
@@ -114,7 +110,6 @@ function get_products(\$search) {
 ?>
 EOL
 
-# Create the register.php file
 cat <<EOL > "$DOCUMENT_ROOT/$APP_NAME/register.php"
 <?php
 include 'db.php';
@@ -156,7 +151,6 @@ if (\$_SERVER['REQUEST_METHOD'] == 'POST') {
 </html>
 EOL
 
-# Create the login.php file
 cat <<EOL > "$DOCUMENT_ROOT/$APP_NAME/login.php"
 <?php
 include 'db.php';
@@ -203,7 +197,6 @@ if (\$_SERVER['REQUEST_METHOD'] == 'POST') {
 </html>
 EOL
 
-# Create the search.php file
 cat <<EOL > "$DOCUMENT_ROOT/$APP_NAME/search.php"
 <?php
 include 'db.php';
@@ -246,7 +239,6 @@ if (\$_SERVER['REQUEST_METHOD'] == 'GET' && isset(\$_GET['search'])) {
 </html>
 EOL
 
-# Create the style.css file
 cat <<EOL > "$DOCUMENT_ROOT/$APP_NAME/style.css"
 body {
     font-family: Arial, sans-serif;
@@ -313,4 +305,13 @@ a:hover {
 }
 EOL
 
-echo "Web application setup complete!"
+# Step 3: Set correct file permissions for all PHP files
+echo "Setting file permissions..."
+sudo chmod -R 755 "$DOCUMENT_ROOT/$APP_NAME"
+
+# Step 4: Start XAMPP services (Apache & MySQL)
+echo "Starting XAMPP services (Apache and MySQL)..."
+sudo "$XAMPP_PATH/lampp" start
+
+echo "Setup completed successfully!"
+echo "You can now access the vulnerable web app by visiting http://localhost/$APP_NAME"
