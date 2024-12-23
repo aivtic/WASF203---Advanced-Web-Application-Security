@@ -94,7 +94,7 @@ To prevent the HTML injection vulnerability, you need to sanitize the user input
 
 #### **Step 2: Test the Mitigated Version**
 
-1. **Open** the `index.html` form again in the browser.
+1. **Open** the `index.php` form again in the browser.
 2. **Submit** the same malicious input (`<script>alert('Hacked!');</script>`) again.
 3. This time, the script should not execute, and instead, you should see the input displayed as text: `&lt;script&gt;alert('Hacked!');&lt;/script&gt;`.
 
