@@ -23,7 +23,7 @@ In this assignment, you will:
 
 - Open your text editor (e.g., VS Code, Sublime Text) and create the following files with the given code.
 
-- **index.html**: This file will contain a simple form where users can input their name.
+- **index.php**: This file will contain a simple form where users can input their name.
 
   ```html
   <!DOCTYPE html>
