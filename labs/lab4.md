@@ -1,5 +1,5 @@
 
-### **Lab 9: Cross-Site Scripting (XSS)**
+### **Lab 4: Cross-Site Scripting (XSS)**
 
 #### **Objective:**
 In this lab, you will:
