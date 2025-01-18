@@ -22,58 +22,64 @@ In this lab, you will:
 
    ```php
    <?php
-   session_start();
-   $log_file = 'access.log';
+session_start();
 
-   // Check if the user is logged in (simulating a login system)
-   if (isset($_SESSION['user'])) {
-       echo "<h1>Welcome, " . $_SESSION['user'] . "!</h1>";
-   } else {
-       echo "<h1>Please log in</h1>";
-       echo '<a href="login.php">Login</a>';
-   }
+// Define the log file path relative to the script's directory
+$log_file = __DIR__ . '/access.log'; // __DIR__ returns the current directory
 
-   // Log every access attempt
-   $log_message = "[" . date("Y-m-d H:i:s") . "] Access attempt from " . $_SERVER['REMOTE_ADDR'] . "\n";
-   file_put_contents($log_file, $log_message, FILE_APPEND);
-   ?>
+// Check if the user is logged in (simulating a login system)
+if (isset($_SESSION['user'])) {
+    echo "<h1>Welcome, " . $_SESSION['user'] . "!</h1>";
+} else {
+    echo "<h1>Please log in</h1>";
+    echo '<a href="login.php">Login</a>';
+}
+
+// Log every access attempt
+$log_message = "[" . date("Y-m-d H:i:s") . "] Access attempt from " . $_SERVER['REMOTE_ADDR'] . "\n";
+file_put_contents($log_file, $log_message, FILE_APPEND);
+?>
+
    ```
 
 4. **login.php**: This page simulates a login form. We'll log login attempts, whether they are successful or failed.
 
    ```php
    <?php
-   session_start();
-   $log_file = 'access.log';
-   
-   // Hardcoded user credentials
-   $username = "admin";
-   $password = "password123";
+session_start();
 
-   if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-       $input_user = $_POST['username'];
-       $input_pass = $_POST['password'];
+// Define the log file path relative to the script's directory
+$log_file = __DIR__ . '/access.log'; // __DIR__ returns the current directory
 
-       if ($input_user === $username && $input_pass === $password) {
-           $_SESSION['user'] = $input_user;
-           echo "<h1>Login Successful!</h1>";
-       } else {
-           echo "<h1>Invalid Credentials!</h1>";
-       }
+// Hardcoded user credentials
+$username = "admin";
+$password = "password123";
 
-       // Log login attempts (both success and failure)
-       $log_message = "[" . date("Y-m-d H:i:s") . "] Login attempt by $input_user from " . $_SERVER['REMOTE_ADDR'] . "\n";
-       file_put_contents($log_file, $log_message, FILE_APPEND);
-   }
-   ?>
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $input_user = $_POST['username'];
+    $input_pass = $_POST['password'];
 
-   <form method="POST">
-       <label for="username">Username:</label>
-       <input type="text" id="username" name="username" required><br>
-       <label for="password">Password:</label>
-       <input type="password" id="password" name="password" required><br>
-       <button type="submit">Login</button>
-   </form>
+    if ($input_user === $username && $input_pass === $password) {
+        $_SESSION['user'] = $input_user;
+        echo "<h1>Login Successful!</h1>";
+    } else {
+        echo "<h1>Invalid Credentials!</h1>";
+    }
+
+    // Log login attempts (both success and failure)
+    $log_message = "[" . date("Y-m-d H:i:s") . "] Login attempt by $input_user from " . $_SERVER['REMOTE_ADDR'] . "\n";
+    file_put_contents($log_file, $log_message, FILE_APPEND);
+}
+?>
+
+<form method="POST">
+    <label for="username">Username:</label>
+    <input type="text" id="username" name="username" required><br>
+    <label for="password">Password:</label>
+    <input type="password" id="password" name="password" required><br>
+    <button type="submit">Login</button>
+</form>
+
    ```
 
 #### **Step 2: Test the Logging Functionality**
@@ -100,70 +106,79 @@ In this lab, you will:
 
    ```php
    <?php
-   session_start();
-   $log_file = 'access.log';
-   $failed_attempts_file = 'failed_attempts.txt';
-   $max_failed_attempts = 3;
-   $time_limit = 300; // 5 minutes
+session_start();
 
-   // Check if there are any failed login attempts recorded
-   if (file_exists($failed_attempts_file)) {
-       $failed_attempts = json_decode(file_get_contents($failed_attempts_file), true);
-   } else {
-       $failed_attempts = [];
-   }
+// Define log file and failed attempts file paths
+$log_file = __DIR__ . '/access.log';
+$failed_attempts_file = __DIR__ . '/failed_attempts.txt';
 
-   // Check if the user is locked out
-   if (isset($failed_attempts['count']) && $failed_attempts['count'] >= $max_failed_attempts) {
-       $last_failed_time = $failed_attempts['last_attempt_time'];
-       if (time() - $last_failed_time < $time_limit) {
-           echo "<h1>Too many failed attempts. Please try again later.</h1>";
-           exit;
-       }
-   }
+// Set the max number of failed attempts and the time limit (5 minutes)
+$max_failed_attempts = 3;
+$time_limit = 300; // 5 minutes
 
-   // Hardcoded user credentials
-   $username = "admin";
-   $password = "password123";
+// Check if there are any failed login attempts recorded
+if (file_exists($failed_attempts_file)) {
+    $failed_attempts = json_decode(file_get_contents($failed_attempts_file), true);
+} else {
+    $failed_attempts = [];
+}
 
-   if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-       $input_user = $_POST['username'];
-       $input_pass = $_POST['password'];
+// Check if the user is locked out
+if (isset($failed_attempts['count']) && $failed_attempts['count'] >= $max_failed_attempts) {
+    $last_failed_time = $failed_attempts['last_attempt_time'];
+    if (time() - $last_failed_time < $time_limit) {
+        echo "<h1>Too many failed attempts. Please try again later.</h1>";
+        exit;
+    } else {
+        // Reset failed attempts if the lockout time has passed
+        $failed_attempts['count'] = 0;
+        file_put_contents($failed_attempts_file, json_encode($failed_attempts));
+    }
+}
 
-       if ($input_user === $username && $input_pass === $password) {
-           $_SESSION['user'] = $input_user;
-           echo "<h1>Login Successful!</h1>";
-       } else {
-           echo "<h1>Invalid Credentials!</h1>";
+// Hardcoded user credentials
+$username = "admin";
+$password = "password123";
 
-           // Track failed login attempts
-           if (!isset($failed_attempts['count'])) {
-               $failed_attempts['count'] = 0;
-           }
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $input_user = $_POST['username'];
+    $input_pass = $_POST['password'];
 
-           $failed_attempts['count']++;
-           $failed_attempts['last_attempt_time'] = time();
+    if ($input_user === $username && $input_pass === $password) {
+        $_SESSION['user'] = $input_user;
+        echo "<h1>Login Successful!</h1>";
+    } else {
+        echo "<h1>Invalid Credentials!</h1>";
 
-           // Log the failed attempt
-           $log_message = "[" . date("Y-m-d H:i:s") . "] Failed login attempt by $input_user from " . $_SERVER['REMOTE_ADDR'] . "\n";
-           file_put_contents($log_file, $log_message, FILE_APPEND);
-           file_put_contents($failed_attempts_file, json_encode($failed_attempts));
+        // Track failed login attempts
+        if (!isset($failed_attempts['count'])) {
+            $failed_attempts['count'] = 0;
+        }
 
-           if ($failed_attempts['count'] >= $max_failed_attempts) {
-               $log_message = "[" . date("Y-m-d H:i:s") . "] ALERT: Suspicious activity detected. Too many failed login attempts from " . $_SERVER['REMOTE_ADDR'] . "\n";
-               file_put_contents($log_file, $log_message, FILE_APPEND);
-           }
-       }
-   }
-   ?>
+        $failed_attempts['count']++;
+        $failed_attempts['last_attempt_time'] = time();
 
-   <form method="POST">
-       <label for="username">Username:</label>
-       <input type="text" id="username" name="username" required><br>
-       <label for="password">Password:</label>
-       <input type="password" id="password" name="password" required><br>
-       <button type="submit">Login</button>
-   </form>
+        // Log the failed attempt
+        $log_message = "[" . date("Y-m-d H:i:s") . "] Failed login attempt by $input_user from " . $_SERVER['REMOTE_ADDR'] . "\n";
+        file_put_contents($log_file, $log_message, FILE_APPEND);
+        file_put_contents($failed_attempts_file, json_encode($failed_attempts));
+
+        if ($failed_attempts['count'] >= $max_failed_attempts) {
+            $log_message = "[" . date("Y-m-d H:i:s") . "] ALERT: Suspicious activity detected. Too many failed login attempts from " . $_SERVER['REMOTE_ADDR'] . "\n";
+            file_put_contents($log_file, $log_message, FILE_APPEND);
+        }
+    }
+}
+?>
+
+<form method="POST">
+    <label for="username">Username:</label>
+    <input type="text" id="username" name="username" required><br>
+    <label for="password">Password:</label>
+    <input type="password" id="password" name="password" required><br>
+    <button type="submit">Login</button>
+</form>
+
    ```
 
 #### **Step 2: Test the Monitoring**
