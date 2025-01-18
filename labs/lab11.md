@@ -23,7 +23,7 @@ In this lab, you will:
    ```php
    <?php
    session_start();
-   $log_file = 'access.log';
+   $log_file = __DIR__ . '/access.log'; // __DIR__ returns the current directory
 
    // Check if the user is logged in (simulating a login system)
    if (isset($_SESSION['user'])) {
@@ -44,7 +44,7 @@ In this lab, you will:
    ```php
    <?php
    session_start();
-   $log_file = 'access.log';
+   $log_file = __DIR__ . '/access.log'; // __DIR__ returns the current directory
    
    // Hardcoded user credentials
    $username = "admin";
