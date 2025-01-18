@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab</title>
+</head>
+<body>
+    <h1>Lab Title</h1>
+    <div id="content"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script>
+        // Use fetch API to load the Markdown file
+        fetch('lab1.md')  // Replace with the actual path to your .md file
+            .then(response => response.text())
+            .then(data => {
+                // Convert Markdown to HTML using marked.js
+                const htmlContent = marked(data);
+
+                // Insert the HTML content into the page
+                document.getElementById('content').innerHTML = htmlContent;
+            })
+            .catch(error => {
+                console.error('Error loading markdown file:', error);
+            });
+    </script>
+</body>
+</html>

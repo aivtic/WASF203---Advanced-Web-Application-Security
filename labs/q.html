@@ -1,0 +1,112 @@
+$body = '
+    <html>
+    <head>
+        <title>Scholarship Application Status</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                line-height: 1.6;
+                background-color: #f4f4f4;
+                color: #333;
+                margin: 0;
+                padding: 0;
+            }
+            .container {
+                max-width: 600px;
+                margin: 40px auto;
+                padding: 30px;
+                background-color: #ffffff;
+                border: 1px solid #ddd;
+                border-radius: 10px;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                text-align: center;
+            }
+            h1 {
+                color: #007bff;
+                font-size: 24px;
+                margin-bottom: 20px;
+            }
+            p {
+                font-size: 16px;
+                margin-bottom: 15px;
+                text-align: left;
+            }
+            .highlight {
+                font-weight: bold;
+                color: #007bff;
+            }
+            .signature {
+                margin-top: 30px;
+                text-align: left;
+                border-top: 1px solid #ddd;
+                padding-top: 20px;
+            }
+            .btn {
+                display: inline-block;
+                margin-top: 20px;
+                padding: 10px 20px;
+                font-size: 16px;
+                color: #ffffff;
+                background-color: #007bff;
+                border-radius: 5px;
+                text-decoration: none;
+            }
+            .btn:hover {
+                background-color: #0056b3;
+            }
+            .footer {
+                margin-top: 30px;
+                padding-top: 20px;
+                border-top: 1px solid #ddd;
+                text-align: center;
+            }
+            .social-icons {
+                list-style: none;
+                padding: 0;
+            }
+            .social-icons li {
+                display: inline-block;
+                margin: 0 10px;
+            }
+            .social-icons a {
+                text-decoration: none;
+                color: #007bff;
+            }
+            .social-icons a:hover {
+                color: #0056b3;
+            }
+            .social-icons img {
+                width: 24px;
+                height: 24px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>Thank you for your application, ' . $fullname . '!</h1>
+            <p>We are pleased to inform you that your application for the <span class="highlight">(' . $First_Choice . ')</span> program is progressing well.</p>
+            <p>Your application is currently under review by our admissions team. If your application passes the initial screening, you will receive an email notification about the next steps.</p>
+            
+            <p>At this stage, we kindly ask you to complete the following actions:</p>
+            <ol style="text-align: left;">
+                <li><strong>Download Reference Request Letter:</strong> Log in to your application portal and navigate to the "Application" section to download your Reference Request Letter.</li>
+                <li><strong>Provide a Reference:</strong> Take this letter to a person of reputable standing in your community to provide a reference on your behalf. Ensure the reference is signed on the official letterhead of the referee.</li>
+                <li><strong>Upload the Reference Letter:</strong> Once the letter is signed, return to the application portal and upload the reference letter as a PDF file. Only PDF uploads are accepted.</li>
+            </ol>
+            
+            <p>Once your reference letter is reviewed and approved, you will be contacted with a schedule for your Virtual Interview, which is the final step in the screening process.</p>
+
+            <p>Note: The entire process is designed to ensure fairness and transparency while selecting candidates for our highly competitive training programs. Your timely completion of these steps will ensure your application moves forward smoothly.</p>
+            
+            <div class="signature">
+                <p>Sincerely,</p>
+                <p>International Cybersecurity and Digital Forensics Academy</p>
+                <p>Admissions Team</p>
+            </div>
+            <div class="footer">
+                <p>Follow us on social media for updates and more.</p>
+            </div>
+        </div>
+    </body>
+    </html>
+';
