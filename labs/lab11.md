@@ -23,8 +23,7 @@ In this lab, you will:
    ```php
    <?php
    session_start();
-   // Define the log file path relative to the script's directory
-  $log_file = __DIR__ . '/access.log'; // __DIR__ returns the current directory
+   $log_file = 'access.log';
 
    // Check if the user is logged in (simulating a login system)
    if (isset($_SESSION['user'])) {
@@ -45,8 +44,7 @@ In this lab, you will:
    ```php
    <?php
    session_start();
-   // Define the log file path relative to the script's directory
-  $log_file = __DIR__ . '/access.log'; // __DIR__ returns the current directory
+   $log_file = 'access.log';
    
    // Hardcoded user credentials
    $username = "admin";
@@ -103,9 +101,8 @@ In this lab, you will:
    ```php
    <?php
    session_start();
-   // Define log file and failed attempts file paths
-  $log_file = __DIR__ . '/access.log';
-  $failed_attempts_file = __DIR__ . '/failed_attempts.txt';
+   $log_file = 'access.log';
+   $failed_attempts_file = 'failed_attempts.txt';
    $max_failed_attempts = 3;
    $time_limit = 300; // 5 minutes
 
