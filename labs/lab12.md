@@ -100,6 +100,5 @@ For this assignment, submit the following:
 
 In this lab, you:
 - Enhanced logging mechanisms to capture detailed information about login attempts.
-- Simulated real-time monitoring and alerting for suspicious activities using tools like Logwatch and Fail2Ban.
-- Learned how real-time alerts and automated responses can significantly improve your web application's security posture.
+
 
