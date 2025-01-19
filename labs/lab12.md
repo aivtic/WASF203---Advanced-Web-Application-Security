@@ -24,7 +24,7 @@ In this lab, you will:
    ```php
    <?php
    session_start();
-   $log_file = 'access.log';
+   $log_file = __DIR__ . '/access.log'; // __DIR__ returns the current directory
 
    // Hardcoded credentials
    $username = "admin";
