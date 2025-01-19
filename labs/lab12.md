@@ -104,7 +104,9 @@ For advanced detection, we can use a basic log monitoring tool like **Logwatch**
    sudo nano /etc/logwatch/conf/logfiles/your_app_log.conf
    ```
 
-   In this file, specify the log file path (e.g., `/path/to/access.log`).
+   In this file, specify the log file path (e.g., `LogFile = /opt/lampp/htdocs/lab12/access.log
+LogFile = /opt/lampp/htdocs/lab12/*.log  # Optional, if you want to include other log files
+`).
 
 #### **Step 2: Simulate Real-Time Alerts**
 
