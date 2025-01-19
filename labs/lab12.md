@@ -103,6 +103,3 @@ In this lab, you:
 - Simulated real-time monitoring and alerting for suspicious activities using tools like Logwatch and Fail2Ban.
 - Learned how real-time alerts and automated responses can significantly improve your web application's security posture.
 
----
-
-Let me know if you're ready to move to the next topic or need more details!
