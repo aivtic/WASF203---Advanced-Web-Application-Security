@@ -142,4 +142,3 @@ In this lab, you:
 
 ---
 
-Let me know if you're ready to proceed or if you need further details!
