@@ -1,4 +1,4 @@
-# ADS201: Advanced Application Security
+# WASF203: Advanced Application Security
 
 Welcome to the repository for **WASF203: Advanced Application Security**. This repository contains all course materials, lab exercises, assignments, and resources for the course. It is designed to help students master advanced concepts in application security.
 
