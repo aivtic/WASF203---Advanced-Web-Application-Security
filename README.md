@@ -1,13 +1,13 @@
 # ADS201: Advanced Application Security
 
-Welcome to the repository for **ADS201: Advanced Application Security**. This repository contains all course materials, lab exercises, assignments, and resources for the course. It is designed to help students master advanced concepts in application security.
+Welcome to the repository for **WASF203: Advanced Application Security**. This repository contains all course materials, lab exercises, assignments, and resources for the course. It is designed to help students master advanced concepts in application security.
 
 ---
 
 ## About the Instructor
 **Mr. Aminu Idris**
 - **Qualifications**: Bsc.Ed, CCNA, CompTIA Security+, CEH, OSCP, CISSP, MPCSEAN
-- **Role**: CEO, International Cybersecurity and Digital Forensics Academy
+- **Role**: Founder, International Cybersecurity and Digital Forensics Academy
 
 Mr. Aminu Idris brings extensive expertise in cybersecurity, digital forensics, and advanced application security. With a strong background in industry-leading certifications, he is dedicated to equipping students with the knowledge and skills to excel in cybersecurity.
 
